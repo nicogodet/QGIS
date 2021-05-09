@@ -74,7 +74,7 @@ class TableViewer(QTableView):
         if self.item is not None:
             try:
                 self.item.aboutToChange.disconnect(self.setDirty)
-            except:
+            except TypeError:
                 # do not raise any error if self.item was deleted
                 pass
 

@@ -57,7 +57,7 @@ class ProcessingLog:
             with codecs.open(ProcessingLog.logFilename(), 'a',
                              encoding='utf-8') as logfile:
                 logfile.write(line)
-        except:
+        except:  # noqa: E722
             pass
 
     @staticmethod

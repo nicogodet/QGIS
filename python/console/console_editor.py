@@ -432,7 +432,7 @@ class Editor(QgsCodeEditorPython):
                                                    'Cannot execute file {0}. Error: {1}\n').format(filename,
                                                                                                    error.strerror)
             print('## Error: ' + IOErrorTr)
-        except:
+        except:  # noqa: E722
             s = traceback.format_exc()
             print('## Error: ')
             sys.stderr.write(s)
@@ -664,7 +664,7 @@ class EditorTab(QWidget):
                 permis = os.stat(path).st_mode
                 # self.newEditor.lastModified = QFileInfo(path).lastModified()
                 os.chmod(path, permis)
-            except:
+            except OSError:
                 raise
 
             temp_path = path + "~"
@@ -1077,7 +1077,7 @@ class EditorTabWidget(QTabWidget):
                             self.parent.listClassMethod.addTopLevelItem(funcItem)
                     if found:
                         sys.path.remove(pathFile)
-                except:
+                except Exception:
                     msgItem = QTreeWidgetItem()
                     msgItem.setText(0, QCoreApplication.translate("PythonConsole", "Check Syntax"))
                     msgItem.setText(1, 'syntaxError')

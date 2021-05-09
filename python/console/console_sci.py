@@ -242,7 +242,7 @@ class ShellScintilla(QgsCodeEditorPython, code.InteractiveInterpreter):
             for s in self.history:
                 wH.write(s + '\n')
             ok = True
-        except:
+        except OSError:
             raise
         wH.close()
         if ok and not fromCloseConsole:
@@ -274,7 +274,7 @@ class ShellScintilla(QgsCodeEditorPython, code.InteractiveInterpreter):
         try:
             cH = codecs.open(_historyFile, 'w', encoding='utf-8')
             ok = True
-        except:
+        except ValueError:
             raise
         cH.close()
         if ok:

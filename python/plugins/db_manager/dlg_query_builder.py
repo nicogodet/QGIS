@@ -307,7 +307,7 @@ class QueryBuilderDlg(QDialog):
         try:
             tab_idx = idx.split(".")[0][1:-1]  # remove "
             col_idx = idx.split(".")[1][1:-1]  # remove '
-        except:
+        except IndexError:
             QMessageBox.warning(self, "Use R-Tree", "All fields are necessary", QMessageBox.Cancel)
         tgt = self.ui.table_target.currentText()
         if tgt in (None, "", " ", "Table (Target)"):

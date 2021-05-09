@@ -44,7 +44,7 @@ def load_user_expressions(path):
         # just importing the file is enough to get it to load the functions into QGIS
         try:
             __import__("expressions.{0}".format(name), locals(), globals())
-        except:
+        except ImportError:
             error = traceback.format_exc()
             msgtitle = QCoreApplication.translate("UserExpressions", "User expressions")
             msg = QCoreApplication.translate("UserExpressions", "The user expression {0} is not valid").format(name)

@@ -62,7 +62,7 @@ try:
         from osgeo import gdal  # NOQA
 
     gdalAvailable = True
-except:
+except ImportError:
     gdalAvailable = False
 
 

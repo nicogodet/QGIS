@@ -248,7 +248,7 @@ class Repositories(QObject):
         try:
             # QgsSettings may contain non-int value...
             i = settings.value(settingsGroup + "/checkOnStartInterval", 1, type=int)
-        except:
+        except TypeError:
             # fallback do 1 day by default
             i = 1
         if i < 0:
@@ -281,7 +281,7 @@ class Repositories(QObject):
         try:
             # QgsSettings may contain ivalid value...
             interval = settings.value(settingsGroup + "/checkOnStartLastDate", type=QDate).daysTo(QDate.currentDate())
-        except:
+        except TypeError:
             interval = 0
         if interval >= self.checkingOnStartInterval():
             return True
@@ -561,7 +561,7 @@ class Plugins(QObject):
         repo = plugin["zip_repository"]
         try:
             self.repoCache[repo] += [plugin]
-        except:
+        except KeyError:
             self.repoCache[repo] = [plugin]
 
     # ----------------------------------------- #
@@ -741,7 +741,7 @@ class Plugins(QObject):
                             # An obsolete plugin in the "user" location is masking a newer one in the "system" location!
                             self.obsoletePlugins += [key]
                         self.localCache[key] = plugin
-            except:
+            except Exception:
                 # it's not necessary to stop if one of the dirs is inaccessible
                 pass
 

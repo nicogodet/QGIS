@@ -96,5 +96,5 @@ def getOutputFromString(s):
             #                out = OutputExtent()
 
             return out
-    except:
+    except Exception:
         return None

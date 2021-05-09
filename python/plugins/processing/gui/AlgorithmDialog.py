@@ -197,7 +197,7 @@ class AlgorithmDialog(QgsProcessingAlgorithmDialogBase):
                 try:
                     self.showLog()
                     self.repaint()
-                except:
+                except Exception:
                     pass
 
                 self.cancelButton().setEnabled(self.algorithm().flags() & QgsProcessingAlgorithm.FlagCanCancel)
@@ -273,7 +273,7 @@ class AlgorithmDialog(QgsProcessingAlgorithmDialogBase):
                 palette = e.widget.palette()
                 palette.setColor(QPalette.Base, QColor(255, 255, 0))
                 e.widget.setPalette(palette)
-            except:
+            except Exception:
                 pass
             self.messageBar().clearWidgets()
             self.messageBar().pushMessage("", self.tr("Wrong or missing parameter value: {0}").format(
@@ -286,7 +286,7 @@ class AlgorithmDialog(QgsProcessingAlgorithmDialogBase):
                 palette = e.widget.palette()
                 palette.setColor(QPalette.Base, QColor(255, 255, 0))
                 e.widget.setPalette(palette)
-            except:
+            except Exception:
                 pass
             self.messageBar().clearWidgets()
             self.messageBar().pushMessage("", e.message,

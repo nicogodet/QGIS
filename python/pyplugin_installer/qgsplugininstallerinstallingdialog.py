@@ -24,6 +24,7 @@
  ***************************************************************************/
 """
 from builtins import str
+from zipfile import BadZipFile
 
 from qgis.PyQt.QtCore import QDir, QUrl, QFile, QCoreApplication
 from qgis.PyQt.QtWidgets import QDialog
@@ -154,14 +155,15 @@ class QgsPluginInstallerInstallingDialog(QDialog, Ui_QgsPluginInstallerInstallin
             # removing old plugin files if exist
             removeDir(QDir.cleanPath(pluginDir + "/" + self.plugin["id"]))  # remove old plugin if exists
             unzip(str(tmpPath), str(pluginDir))  # final extract.
-        except:
+        except (BadZipFile, OSError):
             self.mResult = self.tr("Failed to unzip the plugin package. Probably it's broken or missing from the repository. You may also want to make sure that you have write permission to the plugin directory:") + "\n" + pluginDir
             self.reject()
             return
         try:
             # cleaning: removing the temporary zip file
+            # QFile does not raise exceptions but return True/False instead
             QFile(tmpPath).remove()
-        except:
+        except Exception:
             pass
         self.close()
 

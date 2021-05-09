@@ -541,7 +541,7 @@ class SpatiaLiteDBConnector(DBConnector):
             gdim += zm
         try:
             wkbType = ('POINT', 'LINESTRING', 'POLYGON', 'MULTIPOINT', 'MULTILINESTRING', 'MULTIPOLYGON').index(gtype) + 1
-        except:
+        except IndexError:
             wkbType = 0
         if 'Z' in gdim:
             wkbType += 1000

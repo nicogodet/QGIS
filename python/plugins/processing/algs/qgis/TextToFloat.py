@@ -85,6 +85,6 @@ class TextToFloat(QgisFeatureBasedAlgorithm):
                 feature[self.field_idx] = float(value.replace('%', '')) / 100.0
             else:
                 feature[self.field_idx] = float(value)
-        except:
+        except ValueError:
             feature[self.field_idx] = None
         return [feature]

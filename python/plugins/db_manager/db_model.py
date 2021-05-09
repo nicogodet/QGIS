@@ -51,7 +51,7 @@ try:
     from qgis.core import QgsVectorLayerExporter  # NOQA
 
     isImportVectorAvail = True
-except:
+except ImportError:
     isImportVectorAvail = False
 
 

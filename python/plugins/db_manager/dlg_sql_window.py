@@ -64,7 +64,7 @@ from .dlg_query_builder import QueryBuilderDlg
 
 try:
     from qgis.gui import QgsCodeEditorSQL  # NOQA
-except:
+except ImportError:
     from .sqledit import SqlEdit
     from qgis import gui
 
@@ -560,11 +560,11 @@ class DlgSqlWindow(QWidget, Ui_Dialog):
         # get sensible default columns. do this before sorting in case there's hints in the column order (e.g., id is more likely to be first)
         try:
             defaultGeomCol = next(col for col in cols if col in ['geom', 'geometry', 'the_geom', 'way'])
-        except:
+        except StopIteration:
             defaultGeomCol = None
         try:
             defaultUniqueCol = [col for col in cols if 'id' in col][0]
-        except:
+        except IndexError:
             defaultUniqueCol = None
 
         colNames = sorted(zip(cols, quotedCols))
@@ -605,7 +605,7 @@ class DlgSqlWindow(QWidget, Ui_Dialog):
         try:
             if self.geomCombo.currentIndex() == -1:
                 self.geomCombo.setCurrentIndex(cols.index(defaultGeomCol))
-        except:
+        except ValueError:
             pass
         items = self.uniqueModel.findItems(defaultUniqueCol)
         if items and not uniqueIsFilled:

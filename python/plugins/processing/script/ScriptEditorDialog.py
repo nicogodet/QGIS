@@ -264,7 +264,7 @@ class ScriptEditorDialog(BASE, WIDGET):
         if canvas.mapTool() != prevMapTool:
             try:
                 canvas.mapTool().reset()
-            except:
+            except Exception:
                 pass
             canvas.setMapTool(prevMapTool)
 

@@ -38,7 +38,7 @@ if drv is None:
 try:
     if os.path.exists(args[0]):
         drv.DeleteDataSource(args[0])
-except:
+except OSError:
     pass
 
 

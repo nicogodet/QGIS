@@ -87,7 +87,7 @@ def showException(type, value, tb, msg, messagebar=False, level=Qgis.Warning):
     try:
         blockingdialog = QApplication.instance().activeModalWidget()
         window = QApplication.instance().activeWindow()
-    except:
+    except AttributeError:
         blockingdialog = QApplication.activeModalWidget()
         window = QApplication.activeWindow()
 
@@ -257,7 +257,7 @@ def findPlugins(path):
         try:
             with codecs.open(metadataFile, "r", "utf8") as f:
                 cp.read_file(f)
-        except:
+        except OSError:
             cp = None
 
         pluginName = os.path.basename(plugin)
@@ -302,7 +302,7 @@ def loadPlugin(packageName: str) -> bool:
     try:
         __import__(packageName)
         return True
-    except:
+    except ImportError:
         pass  # continue...
 
     # snake in the grass, we know it's there
@@ -312,7 +312,7 @@ def loadPlugin(packageName: str) -> bool:
     try:
         __import__(packageName)
         return True
-    except:
+    except ImportError:
         msg = QCoreApplication.translate("Python", "Couldn't load plugin '{0}'").format(packageName)
         showException(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2], msg, messagebar=True, level=Qgis.Critical)
         return False
@@ -333,7 +333,7 @@ def _startPlugin(packageName: str) -> bool:
     # create an instance of the plugin
     try:
         plugins[packageName] = package.classFactory(iface)
-    except:
+    except Exception:
         _unloadPluginModules(packageName)
         errMsg = QCoreApplication.translate("Python", "Couldn't load plugin '{0}'").format(packageName)
         msg = QCoreApplication.translate("Python", "{0} due to an error when calling its classFactory() method").format(errMsg)
@@ -358,7 +358,7 @@ def startPlugin(packageName: str) -> bool:
     # initGui
     try:
         plugins[packageName].initGui()
-    except:
+    except Exception:
         del plugins[packageName]
         _unloadPluginModules(packageName)
         errMsg = QCoreApplication.translate("Python", "Couldn't load plugin '{0}'").format(packageName)
@@ -389,7 +389,7 @@ def startProcessingPlugin(packageName: str) -> bool:
     # initProcessing
     try:
         plugins[packageName].initProcessing()
-    except:
+    except Exception:
         del plugins[packageName]
         _unloadPluginModules(packageName)
         msg = QCoreApplication.translate("Python", "{0} due to an error when calling its initProcessing() method").format(errMsg)
@@ -416,7 +416,7 @@ def canUninstallPlugin(packageName: str) -> bool:
         if "canBeUninstalled" not in dir(metadata):
             return True
         return bool(metadata.canBeUninstalled())
-    except:
+    except Exception:
         msg = "Error calling " + packageName + ".canBeUninstalled"
         showException(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2], msg, messagebar=True)
         return True
@@ -437,7 +437,7 @@ def unloadPlugin(packageName: str) -> bool:
         active_plugins.remove(packageName)
         _unloadPluginModules(packageName)
         return True
-    except Exception as e:
+    except Exception:
         msg = QCoreApplication.translate("Python", "Error while unloading plugin {0}").format(packageName)
         showException(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2], msg, messagebar=True)
         return False
@@ -458,7 +458,7 @@ def _unloadPluginModules(packageName: str):
         try:
             if hasattr(sys.modules[mod], 'qCleanupResources'):
                 sys.modules[mod].qCleanupResources()
-        except:
+        except:  # noqa: E722
             # Print stack trace for debug
             qDebug("qCleanupResources error:\n%s" % traceback.format_exc())
 
@@ -474,7 +474,7 @@ def _unloadPluginModules(packageName: str):
         # try to remove the module from python
         try:
             del sys.modules[mod]
-        except:
+        except:  # noqa: E722
             qDebug("Error when removing module:\n%s" % traceback.format_exc())
     # remove the plugin entry
     del _plugin_modules[packageName]
@@ -515,7 +515,7 @@ def showPluginHelp(packageName: str = None, filename: str = "index", section: st
             source = inspect.currentframe().f_back.f_code.co_filename
         else:
             source = sys.modules[packageName].__file__
-    except:
+    except Exception:
         return
     path = os.path.dirname(source)
     locale = str(QLocale().name())
@@ -638,7 +638,7 @@ def startServerPlugin(packageName: str):
     # create an instance of the plugin
     try:
         server_plugins[packageName] = package.serverClassFactory(serverIface)
-    except:
+    except Exception:
         _unloadPluginModules(packageName)
         msg = QCoreApplication.translate("Python",
                                          "{0} due to an error when calling its serverClassFactory() method").format(errMsg)

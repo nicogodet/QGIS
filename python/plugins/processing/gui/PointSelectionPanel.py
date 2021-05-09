@@ -70,7 +70,7 @@ class PointSelectionPanel(BASE, WIDGET):
                     float(tokens[0])
                     float(tokens[1])
                     self.leText.setText(str(default))
-                except:
+                except ValueError:
                     pass
 
     def selectOnCanvas(self):

@@ -272,7 +272,7 @@ def _executeAlgorithm(alg_id):
         if canvas.mapTool() != prevMapTool:
             try:
                 canvas.mapTool().reset()
-            except:
+            except Exception:
                 pass
             canvas.setMapTool(prevMapTool)
     else:

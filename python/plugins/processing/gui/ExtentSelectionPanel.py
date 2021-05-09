@@ -122,7 +122,7 @@ class ExtentSelectionPanel(BASE, WIDGET):
                         s += ' [' + crs.authid() + ']'
                         self.crs = crs
                     self.leText.setText(s)
-                except:
+                except Exception:
                     pass
 
     def selectExtent(self):
@@ -183,7 +183,7 @@ class ExtentSelectionPanel(BASE, WIDGET):
 
         try:
             self.crs = r.crs()
-        except:
+        except AttributeError:
             self.crs = QgsProject.instance().crs()
         if self.crs.isValid():
             s += ' [' + self.crs.authid() + ']'

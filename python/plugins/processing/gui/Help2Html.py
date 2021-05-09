@@ -67,7 +67,7 @@ def getHtmlFromHelpFile(alg, helpFile):
         with open(filePath, 'w', encoding='utf-8') as f:
             f.write(content)
         return QUrl.fromLocalFile(filePath).toString()
-    except:
+    except Exception:
         return None
 
 

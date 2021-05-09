@@ -332,7 +332,7 @@ class PixelSizeWidget(BASE, WIDGET):
     def setValue(self, value):
         try:
             numeric_value = float(value)
-        except:
+        except ValueError:
             return False
 
         self.mCellXSpinBox.setValue(numeric_value)

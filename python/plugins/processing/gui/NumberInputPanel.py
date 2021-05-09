@@ -107,7 +107,7 @@ class ModelerNumberInputPanel(BASE, WIDGET):
 
         try:
             return float(value.strip())
-        except:
+        except ValueError:
             return QgsProcessingModelChildParameterSource.fromExpression(self.leText.text())
 
     def setValue(self, value):
@@ -149,7 +149,7 @@ class NumberInputPanel(NUMBER_BASE, NUMBER_WIDGET):
             if self.param.maximum() is not None and self.param.minimum() is not None:
                 try:
                     self.spnValue.setSingleStep(self.calculateStep(float(self.param.minimum()), float(self.param.maximum())))
-                except:
+                except ValueError:
                     pass
 
         if self.param.maximum() is not None:
@@ -176,14 +176,14 @@ class NumberInputPanel(NUMBER_BASE, NUMBER_WIDGET):
             if not self.allowing_null:
                 try:
                     self.spnValue.setClearValue(float(param.defaultValue()))
-                except:
+                except Exception:
                     pass
         elif self.param.minimum() is not None and not self.allowing_null:
             try:
                 self.setValue(float(self.param.minimum()))
                 if not self.allowing_null:
                     self.spnValue.setClearValue(float(self.param.minimum()))
-            except:
+            except Exception:
                 pass
         elif not self.allowing_null:
             self.setValue(0)
@@ -209,7 +209,7 @@ class NumberInputPanel(NUMBER_BASE, NUMBER_WIDGET):
         try:
             self.layer = self.getLayerFromValue(layer)
             self.btnDataDefined.setVectorLayer(self.layer)
-        except:
+        except Exception:
             pass
 
     def getLayerFromValue(self, value):
@@ -238,7 +238,7 @@ class NumberInputPanel(NUMBER_BASE, NUMBER_WIDGET):
     def setValue(self, value):
         try:
             self.spnValue.setValue(float(value))
-        except:
+        except ValueError:
             return
 
     def calculateStep(self, minimum, maximum):
@@ -322,5 +322,5 @@ class DistanceInputPanel(NumberInputPanel):
     def setValue(self, value):
         try:
             self.spnValue.setValue(float(value))
-        except:
+        except ValueError:
             return

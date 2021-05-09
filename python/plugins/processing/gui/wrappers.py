@@ -463,7 +463,7 @@ class ExtentWidgetWrapper(WidgetWrapper):
                             raise InvalidParameterValue()
                         for token in tokens:
                             float(token)
-                    except:
+                    except ValueError:
                         raise InvalidParameterValue()
                 elif self.parameterDefinition().flags() & QgsProcessingParameterDefinition.FlagOptional:
                     s = None
@@ -521,7 +521,7 @@ class PointWidgetWrapper(WidgetWrapper):
                             raise InvalidParameterValue()
                         for token in tokens:
                             float(token)
-                    except:
+                    except ValueError:
                         raise InvalidParameterValue()
                 elif self.parameterDefinition().flags() & QgsProcessingParameterDefinition.FlagOptional:
                     s = None
@@ -955,7 +955,7 @@ class MapLayerWidgetWrapper(WidgetWrapper):
                         self.combo.setValue(self.parameterDefinition().defaultValue(), self.context)
                     else:
                         self.combo.setLayer(iface.activeLayer())
-            except:
+            except Exception:
                 pass
 
             self.combo.valueChanged.connect(lambda: self.widgetValueHasChanged.emit(self))
@@ -1191,7 +1191,7 @@ class FeatureSourceWidgetWrapper(WidgetWrapper):
             try:
                 if iface.activeLayer().type() == QgsMapLayerType.VectorLayer:
                     self.map_layer_combo.setLayer(iface.activeLayer())
-            except:
+            except Exception:
                 pass
 
             self.map_layer_combo.valueChanged.connect(lambda: self.widgetValueHasChanged.emit(self))
@@ -1450,7 +1450,7 @@ class ExpressionWidgetWrapper(WidgetWrapper):
         if self.dialogType in (DIALOG_STANDARD, DIALOG_BATCH):
             try:
                 return self.widget.asExpression()
-            except:
+            except AttributeError:
                 return self.widget.expression()
         else:
             def validator(v):
@@ -1481,7 +1481,7 @@ class VectorLayerWidgetWrapper(WidgetWrapper):
             try:
                 if iface.activeLayer().type() == QgsMapLayerType.VectorLayer:
                     self.combo.setLayer(iface.activeLayer())
-            except:
+            except Exception:
                 pass
 
             self.combo.valueChanged.connect(lambda: self.widgetValueHasChanged.emit(self))

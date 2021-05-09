@@ -274,7 +274,7 @@ class ConfigDialog(BASE, WIDGET):
                     settingMenu = ProcessingConfig.settings["MENU_" + alg.id()]
                     settingButton = ProcessingConfig.settings["BUTTON_" + alg.id()]
                     settingIcon = ProcessingConfig.settings["ICON_" + alg.id()]
-                except:
+                except Exception:
                     continue
                 self.items[settingMenu] = SettingItem(settingMenu)
                 self.items[settingButton] = SettingItem(settingButton)
@@ -426,10 +426,10 @@ class SettingDelegate(QStyledItemDelegate):
             return ""
         try:
             return int(value)
-        except:
+        except ValueError:
             try:
                 return float(value)
-            except:
+            except ValueError:
                 return str(value)
 
 

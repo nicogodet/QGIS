@@ -86,5 +86,5 @@ class RangePanel(BASE, WIDGET):
             maxVal = float(values[1])
             self.spnMin.setValue(float(minVal))
             self.spnMax.setValue(float(maxVal))
-        except:
+        except (IndexError, ValueError):
             return

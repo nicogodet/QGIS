@@ -78,7 +78,7 @@ class PreconfiguredAlgorithmDialog(AlgorithmDialog):
                     e.parameter.description()),
                     level=Qgis.Warning, duration=5)
                 return
-            except:
+            except Exception:
                 QMessageBox.critical(self,
                                      self.tr('Unable to execute algorithm'),
                                      self.tr('Wrong or missing parameter values'))

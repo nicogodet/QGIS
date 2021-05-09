@@ -23,7 +23,8 @@ __copyright__ = '(C) 2017, Nyall Dawson'
 
 import os
 
-from qgis.core import (QgsGeometry,
+from qgis.core import (QgsException,
+                       QgsGeometry,
                        QgsFeature,
                        QgsFeatureSink,
                        QgsField,
@@ -133,7 +134,7 @@ class FindProjection(QgisAlgorithm):
             try:
                 if transformed_bounds.transform(transform_candidate) != 0:
                     continue
-            except:
+            except QgsException:
                 continue
 
             try:
@@ -143,7 +144,7 @@ class FindProjection(QgisAlgorithm):
                     f.setAttributes([candidate_crs.authid()])
                     sink.addFeature(f, QgsFeatureSink.FastInsert)
                     found_results += 1
-            except:
+            except QgsException:
                 continue
 
             feedback.setProgress(int(current * total))

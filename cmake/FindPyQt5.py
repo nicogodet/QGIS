@@ -93,5 +93,5 @@ try:
     import PyQt5.sip
 
     print("pyqt_sip_module:PyQt5.sip")
-except:
+except ImportError:
     print("pyqt_sip_module:sip")

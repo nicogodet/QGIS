@@ -46,7 +46,7 @@ for f in sorted(glob.glob('resources/function_help/json/*')):
     with open(f, encoding="utf-8") as function_file:
         try:
             json_params = json.load(function_file)
-        except:
+        except json.JSONDecodeError:
             print(f)
             raise
 

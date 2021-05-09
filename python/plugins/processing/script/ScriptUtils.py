@@ -86,7 +86,7 @@ def findAlgorithmSource(name):
     global scriptsRegistry
     try:
         return scriptsRegistry[name]
-    except:
+    except KeyError:
         return None
 
 

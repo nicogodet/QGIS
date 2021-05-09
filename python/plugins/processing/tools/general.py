@@ -204,7 +204,7 @@ def execAlgorithmDialog(algOrName, parameters={}):
     if canvas.mapTool() != prevMapTool:
         try:
             canvas.mapTool().reset()
-        except:
+        except Exception:
             pass
         canvas.setMapTool(prevMapTool)
 

@@ -89,7 +89,7 @@ class Processing(object):
         try:
             provider.setActive(True)
             provider.refreshAlgorithms()
-        except:
+        except Exception:
             # provider could not be activated
             QgsMessageLog.logMessage(Processing.tr('Error: Provider {0} could not be activated\n').format(provider_id),
                                      Processing.tr("Processing"))

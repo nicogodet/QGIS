@@ -87,7 +87,7 @@ class HeatmapPixelSizeWidget(BASE, WIDGET):
             idx = self.source.fields().lookupField(self.radius_field)
             try:
                 max_radius = float(self.source.maximumValue(idx))
-            except:
+            except ValueError:
                 pass
 
         self.raster_bounds.setXMinimum(self.raster_bounds.xMinimum() - max_radius)
@@ -144,7 +144,7 @@ class HeatmapPixelSizeWidget(BASE, WIDGET):
     def setValue(self, value):
         try:
             numeric_value = float(value)
-        except:
+        except ValueError:
             return False
 
         self.mCellXSpinBox.setValue(numeric_value)

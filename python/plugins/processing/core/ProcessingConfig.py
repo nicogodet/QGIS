@@ -231,7 +231,7 @@ class ProcessingConfig:
         try:
             if v == NULL:
                 v = None
-        except:
+        except NameError:
             pass
         if ProcessingConfig.settings[name].valuetype != Setting.SELECTION:
             return v
@@ -336,7 +336,7 @@ class Setting:
             if self.valuetype == self.SELECTION:
                 try:
                     self.value = self.options[int(value)]
-                except:
+                except ValueError:
                     self.value = self.options[0]
             else:
                 self.value = value

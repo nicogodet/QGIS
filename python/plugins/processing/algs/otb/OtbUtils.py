@@ -191,7 +191,7 @@ class OtbUtils:
                         if int(percent) >= 100:
                             feedback.pushConsoleInfo(line)
                         feedback.setProgress(int(percent))
-                    except:
+                    except ValueError:
                         pass
                 else:
                     if feedback is None:

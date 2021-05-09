@@ -107,6 +107,6 @@ class QgsPluginDependenciesDialog(QtWidgets.QDialog, Ui_QgsPluginDependenciesDia
             try:
                 if self.pluginList.cellWidget(i, 4).isChecked():
                     self.__actions[self.pluginList.cellWidget(i, 0).p_id] = self.pluginList.cellWidget(i, 0).action
-            except:
+            except Exception:
                 pass
         super().accept()

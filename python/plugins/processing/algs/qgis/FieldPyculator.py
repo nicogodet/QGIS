@@ -115,7 +115,7 @@ class FieldsPyculator(QgisAlgorithm):
             try:
                 bytecode = compile(globalExpression, '<string>', 'exec')
                 exec(bytecode, new_ns)
-            except:
+            except:  # noqa: E722
                 raise QgsProcessingException(
                     self.tr("FieldPyculator code execute error. Global code block can't be executed!\n{0}\n{1}").format(
                         str(sys.exc_info()[0].__name__), str(sys.exc_info()[1])))
@@ -136,7 +136,7 @@ class FieldsPyculator(QgisAlgorithm):
         # Compile
         try:
             bytecode = compile(code, '<string>', 'exec')
-        except:
+        except:  # noqa: E722
             raise QgsProcessingException(
                 self.tr("FieldPyculator code execute error. Field code block can't be executed!\n{0}\n{1}").format(
                     str(sys.exc_info()[0].__name__), str(sys.exc_info()[1])))

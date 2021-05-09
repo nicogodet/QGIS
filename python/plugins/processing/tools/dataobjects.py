@@ -203,6 +203,6 @@ def getRasterSublayer(path, param):
         else:
             # If the sublayers selection dialog is not to be shown then just return the input path
             return path
-    except:
+    except Exception:
         # If the layer is not a raster layer, then just return the input path
         return path
