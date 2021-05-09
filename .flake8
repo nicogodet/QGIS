@@ -34,9 +34,9 @@ ignore =
 	N815,
 	# mixedCase variable in global scope
 	N816,
-    # line break occurred before a binary operator
+	# line break occurred before a binary operator
 	W503,
-    # line break occurred after a binary operator
+	# line break occurred after a binary operator
 	W504,
 
 per-file-ignores =
