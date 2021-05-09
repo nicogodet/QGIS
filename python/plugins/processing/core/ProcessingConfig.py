@@ -336,7 +336,7 @@ class Setting:
             if self.valuetype == self.SELECTION:
                 try:
                     self.value = self.options[int(value)]
-                except ValueError:
+                except (IndexError, ValueError):
                     self.value = self.options[0]
             else:
                 self.value = value
