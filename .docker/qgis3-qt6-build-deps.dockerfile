@@ -1,9 +1,7 @@
 FROM fedora:rawhide as single
 MAINTAINER Matthias Kuhn <matthias@opengis.ch>
 
-RUN mv /etc/yum.repos.d_backup /etc/yum.repos.d \
-    && rm /var/cache/dnf/fastestmirror.cache \
-    && dnf -y upgrade \
+RUN dnf -y upgrade \
     && dnf -y install \
     bison \
     ccache \
