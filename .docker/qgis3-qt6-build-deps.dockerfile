@@ -1,7 +1,7 @@
 FROM fedora:rawhide as single
 MAINTAINER Matthias Kuhn <matthias@opengis.ch>
 
-RUN dnf update \
+RUN dnf -y update \
     && dnf -y install \
     bison \
     ccache \
