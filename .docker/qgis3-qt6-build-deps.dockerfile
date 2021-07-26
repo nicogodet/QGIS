@@ -1,7 +1,8 @@
 FROM fedora:rawhide as single
 MAINTAINER Matthias Kuhn <matthias@opengis.ch>
 
-RUN dnf -y install \
+RUN dnf update \
+    && dnf -y install \
     bison \
     ccache \
     clang \
@@ -37,11 +38,6 @@ RUN dnf -y install \
     wget \
     openssl-devel \
     libsecret-devel
-
-RUN df -h \
-  && cd /usr \
-  && ls -l \
-  && who
 
 RUN cd /usr/src \
   && wget https://github.com/KDE/qca/archive/refs/tags/v2.3.3.zip \
