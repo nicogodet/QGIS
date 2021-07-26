@@ -42,8 +42,8 @@ RUN cd /usr/src \
   && wget https://github.com/KDE/qca/archive/refs/tags/v2.3.3.zip \
   && unzip v2.3.3.zip \
   && cd qca-2.3.3 \
-  && cmake -DCMAKE_INSTALL_PREFIX=/usr -DQT6=ON -GNinja \
-  && ninja install
+  && sudo cmake -DCMAKE_INSTALL_PREFIX=/usr -DQT6=ON -GNinja \
+  && sudo ninja install
 
 RUN cd /usr/src \
   && wget https://github.com/frankosterfeld/qtkeychain/archive/refs/heads/master.zip \
