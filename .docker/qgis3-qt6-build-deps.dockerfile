@@ -2,7 +2,7 @@ FROM ubuntu:rolling as single
 MAINTAINER Matthias Kuhn <matthias@opengis.ch>
 
 RUN apt update \
-    apt -y install \
+    && apt -y install \
     bison \
     ccache \
     clang \
