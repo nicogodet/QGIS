@@ -1,8 +1,8 @@
-FROM fedora:rawhide as single
+FROM ubuntu:rolling as single
 MAINTAINER Matthias Kuhn <matthias@opengis.ch>
 
-RUN dnf -y upgrade \
-    && dnf -y install \
+RUN apt update \
+    apt -y install \
     bison \
     ccache \
     clang \
