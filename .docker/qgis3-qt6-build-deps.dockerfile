@@ -10,6 +10,7 @@ RUN dnf -y install \
     expat-devel \
     fcgi-devel \
     flex \
+    hdf5-devel \
     gdal-devel \
     geos-devel \
     gsl-devel \
@@ -17,7 +18,9 @@ RUN dnf -y install \
     libspatialite-devel \
     libzip-devel \
     libzstd-devel \
+    libxml2-devel \
     ninja-build \
+    netcdf-devel \
     proj-devel \
     protobuf-devel \
     protobuf-lite-devel \
@@ -33,6 +36,7 @@ RUN dnf -y install \
     sqlite-devel \
     unzip \
     xorg-x11-server-Xvfb \
+    xorg-x11-xkb-utils-devel \
     util-linux \
     wget \
     openssl-devel \
