@@ -1,6 +1,8 @@
 FROM nicogodet/fed-test:rawhide as single
 MAINTAINER Matthias Kuhn <matthias@opengis.ch>
 
+SHELL ["/bin/bash", "-c"]
+
 RUN systemctl restart systemd-resolved.service \
     && resolvectl flush-caches
 
