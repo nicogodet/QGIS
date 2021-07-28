@@ -36,7 +36,6 @@ RUN dnf -y install \
     sqlite-devel \
     unzip \
     xorg-x11-server-Xvfb \
-    xorg-x11-xkb-utils-devel \
     util-linux \
     wget \
     openssl-devel \
