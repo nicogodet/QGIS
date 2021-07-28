@@ -7,11 +7,6 @@ RUN dnf -y install \
     ccache \
     clang \
     clazy \
-    cmake \
-    make \
-    automake \
-    gcc \
-    gcc-c++ \
     exiv2-devel \
     expat-devel \
     fcgi-devel \
@@ -29,12 +24,24 @@ RUN dnf -y install \
     protobuf-lite-devel \
     python3-devel \
     python3-termcolor \
+    qt6-qt3d-devel \
+    qt6-qtbase-devel \
+    qt6-qtdeclarative-devel \
+    qt6-qttools-static \
+    qt6-qtsvg-devel \
+    qt6-qt5compat-devel \
+    spatialindex-devel \
+    sqlite-devel \
     unzip \
     xorg-x11-server-Xvfb \
     util-linux \
     wget \
     openssl-devel \
-    libsecret-devel
+    libsecret-devel \
+    make \
+    automake \
+    gcc \
+    gcc-c++
 
 RUN cd /usr/src \
   && wget https://github.com/KDE/qca/archive/refs/tags/v2.3.3.zip \
