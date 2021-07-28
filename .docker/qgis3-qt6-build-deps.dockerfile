@@ -2,6 +2,34 @@ FROM fedora:34 as single
 MAINTAINER Matthias Kuhn <matthias@opengis.ch>
 
 #SHELL ["/bin/bash", "-c"]
+RUN dnf -y install \
+    bison \
+    ccache \
+    clang \
+    clazy \
+    exiv2-devel \
+    expat-devel \
+    fcgi-devel \
+    flex \
+    gdal-devel \
+    geos-devel \
+    gsl-devel \
+    libpq-devel \
+    libspatialite-devel \
+    libzip-devel \
+    libzstd-devel \
+    ninja-build \
+    proj-devel \
+    protobuf-devel \
+    protobuf-lite-devel \
+    python3-devel \
+    python3-termcolor \
+    unzip \
+    xorg-x11-server-Xvfb \
+    util-linux \
+    wget \
+    openssl-devel \
+    libsecret-devel
 
 RUN cd /usr/src \
   && wget https://github.com/KDE/qca/archive/refs/tags/v2.3.3.zip \
