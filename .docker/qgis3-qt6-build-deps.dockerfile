@@ -1,7 +1,8 @@
-FROM nicogodet/fed-test:rawhide
+FROM nicogodet/fed-test:rawhide as single
 MAINTAINER Matthias Kuhn <matthias@opengis.ch>
 
-RUN dnf -y update
+RUN systemctl restart systemd-resolved.service \
+    && resolvectl flush-caches
 
 RUN dnf -y install \
     bison \
