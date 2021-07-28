@@ -7,6 +7,11 @@ RUN dnf -y install \
     ccache \
     clang \
     clazy \
+    cmake \
+    make \
+    automake \
+    gcc \
+    gcc-c++ \
     exiv2-devel \
     expat-devel \
     fcgi-devel \
