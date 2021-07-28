@@ -1,47 +1,7 @@
-FROM nicogodet/fed-test:rawhide as single
+FROM fedora:34 as single
 MAINTAINER Matthias Kuhn <matthias@opengis.ch>
 
-SHELL ["/bin/bash", "-c"]
-
-RUN systemctl restart systemd-resolved.service \
-    && resolvectl flush-caches
-
-RUN dnf -y install \
-    bison \
-    ccache \
-    clang \
-    clazy \
-    exiv2-devel \
-    expat-devel \
-    fcgi-devel \
-    flex \
-    gdal-devel \
-    geos-devel \
-    gsl-devel \
-    libpq-devel \
-    libspatialite-devel \
-    libzip-devel \
-    libzstd-devel \
-    ninja-build \
-    proj-devel \
-    protobuf-devel \
-    protobuf-lite-devel \
-    python3-devel \
-    python3-termcolor \
-    qt6-qt3d-devel \
-    qt6-qtbase-devel \
-    qt6-qtdeclarative-devel \
-    qt6-qttools-static \
-    qt6-qtsvg-devel \
-    qt6-qt5compat-devel \
-    spatialindex-devel \
-    sqlite-devel \
-    unzip \
-    xorg-x11-server-Xvfb \
-    util-linux \
-    wget \
-    openssl-devel \
-    libsecret-devel
+#SHELL ["/bin/bash", "-c"]
 
 RUN cd /usr/src \
   && wget https://github.com/KDE/qca/archive/refs/tags/v2.3.3.zip \
