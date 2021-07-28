@@ -1,9 +1,7 @@
-FROM nicogodet/fed-test:rawhide as single
+FROM nicogodet/fed-test:rawhide
 MAINTAINER Matthias Kuhn <matthias@opengis.ch>
 
-RUN rpm -qv --verify fedora-repos \
-    && cd /etc/yum.repos.d/ \
-    && ls -l
+RUN dnf -y update
 
 RUN dnf -y install \
     bison \
