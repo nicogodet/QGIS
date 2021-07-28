@@ -1,8 +1,7 @@
-FROM ubuntu:rolling as single
+FROM nicogodet/fed-test:rawhide as single
 MAINTAINER Matthias Kuhn <matthias@opengis.ch>
 
-RUN apt update \
-    && apt -y install \
+RUN dnf -y install \
     bison \
     ccache \
     clang \
