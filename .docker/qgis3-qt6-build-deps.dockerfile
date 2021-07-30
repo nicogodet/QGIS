@@ -51,7 +51,9 @@ RUN cd /usr/src \
   && cd qca-2.3.3 \
   && cmake -DCMAKE_INSTALL_PREFIX=/usr -DQT6=ON -GNinja \
   && ninja install \
-  && ls -l /usr/lib/libqca-qt6.so.2
+  && ln -s /usr/lib/libqca-qt6.so /usr/lib64/libqca-qt6.so \
+  && ln -s /usr/lib/libqca-qt6.so.2 /usr/lib64/libqca-qt6.so.2 \
+  && ln -s /usr/lib/libqca-qt6.so.2.3.3 /usr/lib64/libqca-qt6.so.2.3.3
 
 RUN cd /usr/src \
   && wget https://github.com/frankosterfeld/qtkeychain/archive/refs/heads/master.zip \
