@@ -1,4 +1,4 @@
-FROM fedora:34 as single
+FROM nicogodet/fed-test:rawhide as single
 MAINTAINER Matthias Kuhn <matthias@opengis.ch>
 
 RUN dnf -y install \
