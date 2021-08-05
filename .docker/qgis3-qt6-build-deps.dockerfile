@@ -51,7 +51,7 @@ RUN cd /usr/src \
   && rm master.zip \
   && mkdir build \
   && cd build \
-  && cmake -DCMAKE_INSTALL_PREFIX=/usr -DQT6=ON -GNinja \
+  && cmake -DCMAKE_INSTALL_PREFIX=/usr -DQT6=ON -GNinja ../qca-master \
   && ninja install
 
 RUN cd /usr/src \
