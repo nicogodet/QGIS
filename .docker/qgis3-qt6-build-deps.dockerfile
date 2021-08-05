@@ -1,4 +1,4 @@
-FROM nicogodet/fed-test:rawhide as single
+FROM fedora:34 as single
 MAINTAINER Matthias Kuhn <matthias@opengis.ch>
 
 RUN dnf -y install \
@@ -46,10 +46,12 @@ RUN dnf -y install \
     gcc-c++
 
 RUN cd /usr/src \
-  && wget https://github.com/KDE/qca/archive/refs/tags/v2.3.3.zip \
-  && unzip v2.3.3.zip \
-  && cd qca-2.3.3 \
-  && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib64 -DQT6=ON -GNinja \
+  && wget https://github.com/KDE/qca/archive/refs/heads/master.zip \
+  && unzip master.zip \
+  && rm master.zip \
+  && mkdir build \
+  && cd build \
+  && cmake -DCMAKE_INSTALL_PREFIX=/usr -DQT6=ON -GNinja \
   && ninja install
 
 RUN cd /usr/src \
