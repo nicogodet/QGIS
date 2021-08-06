@@ -445,23 +445,63 @@ QgsProcessingStringWidgetWrapper::QgsProcessingStringWidgetWrapper( const QgsPro
 
 QWidget *QgsProcessingStringWidgetWrapper::createWidget()
 {
-  switch ( type() )
-  {
-    case QgsProcessingGui::Standard:
-    case QgsProcessingGui::Modeler:
-    {
-      if ( static_cast< const QgsProcessingParameterString * >( parameterDefinition() )->multiLine() )
-      {
-        mPlainTextEdit = new QPlainTextEdit();
-        mPlainTextEdit->setToolTip( parameterDefinition()->toolTip() );
+  const QVariantMap metadata = parameterDefinition()->metadata();
+  const QVariant valueHintsVariant = metadata.value( QStringLiteral( "widget_wrapper" ) ).toMap().value( QStringLiteral( "value_hints" ) );
 
-        connect( mPlainTextEdit, &QPlainTextEdit::textChanged, this, [ = ]
+  if ( valueHintsVariant.isValid() )
+  {
+    const QVariantList valueList = valueHintsVariant.toList();
+    mComboBox = new QComboBox();
+    mComboBox->setToolTip( parameterDefinition()->toolTip() );
+
+    if ( parameterDefinition()->flags() & QgsProcessingParameterDefinition::FlagOptional )
+    {
+      mComboBox->addItem( QString() );
+    }
+    for ( const QVariant &entry : valueList )
+    {
+      mComboBox->addItem( entry.toString(), entry.toString() );
+    }
+    mComboBox->setCurrentIndex( 0 );
+
+    connect( mComboBox, qOverload<int>( &QComboBox::currentIndexChanged ), this, [ = ]( int )
+    {
+      emit widgetValueHasChanged( this );
+    } );
+    return mComboBox;
+  }
+  else
+  {
+    switch ( type() )
+    {
+      case QgsProcessingGui::Standard:
+      case QgsProcessingGui::Modeler:
+      {
+        if ( static_cast< const QgsProcessingParameterString * >( parameterDefinition() )->multiLine() )
         {
-          emit widgetValueHasChanged( this );
-        } );
-        return mPlainTextEdit;
+          mPlainTextEdit = new QPlainTextEdit();
+          mPlainTextEdit->setToolTip( parameterDefinition()->toolTip() );
+
+          connect( mPlainTextEdit, &QPlainTextEdit::textChanged, this, [ = ]
+          {
+            emit widgetValueHasChanged( this );
+          } );
+          return mPlainTextEdit;
+        }
+        else
+        {
+          mLineEdit = new QLineEdit();
+          mLineEdit->setToolTip( parameterDefinition()->toolTip() );
+
+          connect( mLineEdit, &QLineEdit::textChanged, this, [ = ]
+          {
+            emit widgetValueHasChanged( this );
+          } );
+          return mLineEdit;
+        }
       }
-      else
+
+      case QgsProcessingGui::Batch:
       {
         mLineEdit = new QLineEdit();
         mLineEdit->setToolTip( parameterDefinition()->toolTip() );
@@ -473,19 +513,8 @@ QWidget *QgsProcessingStringWidgetWrapper::createWidget()
         return mLineEdit;
       }
     }
-
-    case QgsProcessingGui::Batch:
-    {
-      mLineEdit = new QLineEdit();
-      mLineEdit->setToolTip( parameterDefinition()->toolTip() );
-
-      connect( mLineEdit, &QLineEdit::textChanged, this, [ = ]
-      {
-        emit widgetValueHasChanged( this );
-      } );
-      return mLineEdit;
-    }
   }
+
   return nullptr;
 }
 
@@ -496,6 +525,19 @@ void QgsProcessingStringWidgetWrapper::setWidgetValue( const QVariant &value, Qg
     mLineEdit->setText( v );
   if ( mPlainTextEdit )
     mPlainTextEdit->setPlainText( v );
+  if ( mComboBox )
+  {
+    int index = -1;
+    if ( !value.isValid() )
+      index = mComboBox->findData( QVariant() );
+    else
+      index = mComboBox->findData( v );
+
+    if ( index >= 0 )
+      mComboBox->setCurrentIndex( index );
+    else
+      mComboBox->setCurrentIndex( 0 );
+  }
 }
 
 QVariant QgsProcessingStringWidgetWrapper::widgetValue() const
@@ -504,6 +546,8 @@ QVariant QgsProcessingStringWidgetWrapper::widgetValue() const
     return mLineEdit->text();
   else if ( mPlainTextEdit )
     return mPlainTextEdit->toPlainText();
+  else if ( mComboBox )
+    return mComboBox->currentData();
   else
     return QVariant();
 }
@@ -5757,6 +5801,7 @@ QgsProcessingMapLayerParameterDefinitionWidget::QgsProcessingMapLayerParameterDe
   mLayerTypeComboBox->addItem( tr( "Vector (Any Geometry Type)" ), QgsProcessing::TypeVectorAnyGeometry );
   mLayerTypeComboBox->addItem( tr( "Raster" ), QgsProcessing::TypeRaster );
   mLayerTypeComboBox->addItem( tr( "Mesh" ), QgsProcessing::TypeMesh );
+  mLayerTypeComboBox->addItem( tr( "Plugin" ), QgsProcessing::TypePlugin );
 
   if ( const QgsProcessingParameterMapLayer *layerParam = dynamic_cast<const QgsProcessingParameterMapLayer *>( definition ) )
   {
@@ -6736,6 +6781,17 @@ void QgsProcessingMultipleLayerPanelWidget::setModel( QgsProcessingModelAlgorith
       break;
     }
 
+    case QgsProcessing::TypePlugin:
+    {
+      mModelSources = model->availableSourcesForChild( modelChildAlgorithmID, QStringList() << QgsProcessingParameterMapLayer::typeName()
+                      << QgsProcessingParameterMultipleLayers::typeName()
+                      << QgsProcessingParameterFile::typeName(),
+                      QStringList() << QgsProcessingOutputFile::typeName()
+                      << QgsProcessingOutputMapLayer::typeName()
+                      << QgsProcessingOutputMultipleLayers::typeName() );
+      break;
+    }
+
     case QgsProcessing::TypeVector:
     {
       mModelSources = model->availableSourcesForChild( modelChildAlgorithmID, QStringList() << QgsProcessingParameterFeatureSource::typeName()
@@ -6877,6 +6933,7 @@ QgsProcessingMultipleLayerParameterDefinitionWidget::QgsProcessingMultipleLayerP
   mLayerTypeComboBox->addItem( tr( "Raster" ), QgsProcessing::TypeRaster );
   mLayerTypeComboBox->addItem( tr( "File" ), QgsProcessing::TypeFile );
   mLayerTypeComboBox->addItem( tr( "Mesh" ), QgsProcessing::TypeMesh );
+  mLayerTypeComboBox->addItem( tr( "Plugin" ), QgsProcessing::TypePlugin );
   if ( const QgsProcessingParameterMultipleLayers *layersParam = dynamic_cast<const QgsProcessingParameterMultipleLayers *>( definition ) )
     mLayerTypeComboBox->setCurrentIndex( mLayerTypeComboBox->findData( layersParam->layerType() ) );
 

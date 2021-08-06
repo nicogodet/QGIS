@@ -2720,6 +2720,10 @@ QString QgsProcessingParameterMapLayer::asScriptCode() const
       case QgsProcessing::TypeMesh:
         code += QLatin1String( "mesh " );
         break;
+
+      case QgsProcessing::TypePlugin:
+        code += QLatin1String( "plugin " );
+        break;
     }
   }
 
@@ -2767,6 +2771,12 @@ QgsProcessingParameterMapLayer *QgsProcessingParameterMapLayer::fromScriptCode( 
     {
       types << QgsProcessing::TypeMesh;
       def = def.mid( 5 );
+      continue;
+    }
+    else if ( def.startsWith( QLatin1String( "plugin" ), Qt::CaseInsensitive ) )
+    {
+      types << QgsProcessing::TypePlugin;
+      def = def.mid( 7 );
       continue;
     }
     break;
@@ -3354,8 +3364,7 @@ bool QgsProcessingParameterFile::checkValueIsAcceptable( const QVariant &input, 
       }
       else if ( !mFileFilter.isEmpty() )
       {
-        const QString test = QgsFileUtils::addExtensionFromFilter( string, mFileFilter );
-        return test == string;
+        return QgsFileUtils::fileMatchesFilter( string, mFileFilter );
       }
       else
       {
@@ -3848,6 +3857,7 @@ QString QgsProcessingParameterMultipleLayers::createFileFilter() const
       return QgsProviderRegistry::instance()->fileMeshFilters() + QStringLiteral( ";;" ) + QObject::tr( "All files (*.*)" );
 
     case QgsProcessing::TypeMapLayer:
+    case QgsProcessing::TypePlugin:
       return createAllMapLayerFileFilter();
   }
   return QString();
@@ -5840,6 +5850,7 @@ bool QgsProcessingParameterFeatureSink::hasGeometry() const
     case QgsProcessing::TypeFile:
     case QgsProcessing::TypeVector:
     case QgsProcessing::TypeMesh:
+    case QgsProcessing::TypePlugin:
       return false;
   }
   return true;
@@ -6535,6 +6546,7 @@ bool QgsProcessingParameterVectorDestination::hasGeometry() const
     case QgsProcessing::TypeFile:
     case QgsProcessing::TypeVector:
     case QgsProcessing::TypeMesh:
+    case QgsProcessing::TypePlugin:
       return false;
   }
   return true;

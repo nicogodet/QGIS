@@ -51,6 +51,9 @@ set(QGIS_CORE_SRCS
   geocoding/qgsnominatimgeocoder.cpp
   geocoding/qgsgooglemapsgeocoder.cpp
 
+  gps/qgsbabelformat.cpp
+  gps/qgsbabelformatregistry.cpp
+  gps/qgsbabelgpsdevice.cpp
   gps/qgsgpsconnection.cpp
   gps/qgsgpsconnectionregistry.cpp
   gps/qgsgpsdconnection.cpp
@@ -125,6 +128,10 @@ set(QGIS_CORE_SRCS
   effects/qgspainteffectregistry.cpp
   effects/qgsshadoweffect.cpp
   effects/qgstransformeffect.cpp
+
+  externalstorage/qgsexternalstorage.cpp
+  externalstorage/qgsexternalstorageregistry.cpp
+  externalstorage/qgssimplecopyexternalstorage.cpp
 
   layertree/qgscolorramplegendnode.cpp
   layertree/qgscolorramplegendnodesettings.cpp
@@ -317,6 +324,7 @@ set(QGIS_CORE_SRCS
   qgsconnectionregistry.cpp
   qgscoordinateformatter.cpp
   qgscoordinateutils.cpp
+  qgscopyfiletask.cpp
   qgscplhttpfetchoverrider.cpp
   qgscredentials.cpp
   qgsdartmeasurement.cpp
@@ -935,6 +943,7 @@ set(QGIS_CORE_HDRS
   qgsconnectionregistry.h
   qgscoordinateformatter.h
   qgscoordinateutils.h
+  qgscopyfiletask.h
   qgscredentials.h
   qgsdartmeasurement.h
   qgsdatabaseschemamodel.h
@@ -1202,6 +1211,9 @@ set(QGIS_CORE_HDRS
   editform/qgsattributeeditorhtmlelement.h
   editform/qgsattributeeditorqmlelement.h
 
+  externalstorage/qgsexternalstorage.h
+  externalstorage/qgsexternalstorageregistry.h
+
   effects/qgsblureffect.h
   effects/qgscoloreffect.h
   effects/qgseffectstack.h
@@ -1274,6 +1286,9 @@ set(QGIS_CORE_HDRS
   geometry/qgswkbtypes.h
   geometry/qgsray3d.h
 
+  gps/qgsbabelformat.h
+  gps/qgsbabelformatregistry.h
+  gps/qgsbabelgpsdevice.h
   gps/qgsgpsconnection.h
   gps/qgsgpsdconnection.h
   gps/qgsgpsdetector.h
@@ -1733,6 +1748,9 @@ set(QGIS_CORE_PRIVATE_HDRS
   qgsspatialindexkdbush_p.h
 
   editform/qgseditformconfig_p.h
+
+  externalstorage/qgssimplecopyexternalstorage_p.h
+
   proj/qgscoordinatereferencesystem_p.h
   proj/qgscoordinatetransformcontext_p.h
   proj/qgscoordinatetransform_p.h
@@ -1918,6 +1936,7 @@ target_include_directories(qgis_core PUBLIC
   editform
   effects
   expression
+  externalstorage
   fieldformatter
   geometry
   geocms

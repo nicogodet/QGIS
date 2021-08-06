@@ -27,6 +27,7 @@
 #include "qgsmessagelog.h"
 #include "qgsexception.h"
 #include "qgsexpressioncontextutils.h"
+#include "qgsgeometryengine.h"
 
 #include <QThreadStorage>
 #include <QStack>
@@ -137,6 +138,26 @@ QgsVectorLayerFeatureIterator::QgsVectorLayerFeatureIterator( QgsVectorLayerFeat
     close();
     return;
   }
+
+
+  // prepare spatial filter geometries for optimal speed
+  switch ( mRequest.spatialFilterType() )
+  {
+    case Qgis::SpatialFilterType::NoFilter:
+    case Qgis::SpatialFilterType::BoundingBox:
+      break;
+
+    case Qgis::SpatialFilterType::DistanceWithin:
+      if ( !mRequest.referenceGeometry().isEmpty() )
+      {
+        mDistanceWithinGeom = mRequest.referenceGeometry();
+        mDistanceWithinEngine.reset( QgsGeometry::createGeometryEngine( mDistanceWithinGeom.constGet() ) );
+        mDistanceWithinEngine->prepareGeometry();
+        mDistanceWithin = mRequest.distanceWithin();
+      }
+      break;
+  }
+
   if ( !mFilterRect.isNull() )
   {
     // update request to be the unprojected filter rect
@@ -277,7 +298,7 @@ QgsVectorLayerFeatureIterator::QgsVectorLayerFeatureIterator( QgsVectorLayerFeat
         providerLimit += mSource->mChangedAttributeValues.size();
       }
 
-      if ( mProviderRequest.filterType() == QgsFeatureRequest::FilterExpression || !mProviderRequest.filterRect().isNull() )
+      if ( mProviderRequest.filterType() == QgsFeatureRequest::FilterExpression || mProviderRequest.spatialFilterType() != Qgis::SpatialFilterType::NoFilter )
       {
         // geometry changes may mean some features no longer match expression or rect, so increase limit sent to provider
         providerLimit += mSource->mChangedGeometries.size();
@@ -879,6 +900,12 @@ bool QgsVectorLayerFeatureIterator::postProcessFeature( QgsFeature &feature )
   bool result = checkGeometryValidity( feature );
   if ( result )
     geometryToDestinationCrs( feature, mTransform );
+
+  if ( result && mDistanceWithinEngine && feature.hasGeometry() )
+  {
+    result = mDistanceWithinEngine->distance( feature.geometry().constGet() ) <= mDistanceWithin;
+  }
+
   return result;
 }
 

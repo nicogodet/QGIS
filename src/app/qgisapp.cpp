@@ -109,6 +109,7 @@
 #include "qgsgeometrycheckregistry.h"
 
 #include "options/qgscodeeditoroptions.h"
+#include "options/qgsgpsdeviceoptions.h"
 
 #ifdef HAVE_3D
 #include "qgs3d.h"
@@ -1697,6 +1698,7 @@ QgisApp::QgisApp( QSplashScreen *splash, bool restorePlugins, bool skipVersionCh
   } );
 
   mCodeEditorWidgetFactory.reset( std::make_unique< QgsCodeEditorOptionsFactory >() );
+  mBabelGpsDevicesWidgetFactory.reset( std::make_unique< QgsGpsDeviceOptionsFactory >() );
 
 #ifdef HAVE_3D
   m3DOptionsWidgetFactory.reset( std::make_unique< Qgs3DOptionsFactory >() );
@@ -2692,6 +2694,7 @@ void QgisApp::createActions()
   connect( mActionNewGeoPackageLayer, &QAction::triggered, this, &QgisApp::newGeoPackageLayer );
   connect( mActionNewMemoryLayer, &QAction::triggered, this, &QgisApp::newMemoryLayer );
   connect( mActionNewMeshLayer, &QAction::triggered, this, &QgisApp::newMeshLayer );
+  connect( mActionNewGpxLayer, &QAction::triggered, this, &QgisApp::newGpxLayer );
   connect( mActionNewVirtualLayer, &QAction::triggered, this, &QgisApp::addVirtualLayer );
   connect( mActionShowRasterCalculator, &QAction::triggered, this, &QgisApp::showRasterCalculator );
   connect( mActionShowMeshCalculator, &QAction::triggered, this, &QgisApp::showMeshCalculator );
@@ -6505,6 +6508,55 @@ void QgisApp::newMeshLayer()
   QgsNewMeshLayerDialog dialog( this );
   dialog.setCrs( QgsProject::instance()->defaultCrsForNewLayers() );
   dialog.exec();
+}
+
+void QgisApp::newGpxLayer()
+{
+  QgsSettings settings;
+  const QString dir = settings.value( QStringLiteral( "gps/gpxdirectory" ), QDir::homePath(), QgsSettings::App ).toString();
+  QString fileName =
+    QFileDialog::getSaveFileName( this,
+                                  tr( "New GPX File" ),
+                                  dir,
+                                  tr( "GPS eXchange file" ) + " (*.gpx)" );
+  if ( !fileName.isEmpty() )
+  {
+    fileName = QgsFileUtils::ensureFileNameHasExtension( fileName, { QStringLiteral( "gpx" )} );
+    const QFileInfo fileInfo( fileName );
+    settings.setValue( QStringLiteral( "gps/gpxdirectory" ), fileInfo.absolutePath(), QgsSettings::App );
+
+    QFile outputFile( fileName );
+    if ( !outputFile.open( QFile::WriteOnly | QIODevice::Truncate ) )
+    {
+      QMessageBox::warning( nullptr, tr( "New GPX File" ),
+                            tr( "Unable to create a GPX file with the given name. "
+                                "Try again with another name or in another "
+                                "directory." ) );
+      return;
+    }
+
+    QTextStream outStream( &outputFile );
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    outStream.setCodec( "UTF-8" );
+#endif
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+    outStream << "<gpx></gpx>" << endl;
+#else
+    outStream << "<gpx></gpx>" << Qt::endl;
+#endif
+    outputFile.close();
+
+    if ( QgsVectorLayer *trackLayer = addVectorLayer( fileName + "?type=track",
+                                      fileInfo.baseName() + ", tracks", QStringLiteral( "gpx" ) ) )
+      trackLayer->startEditing();
+    if ( QgsVectorLayer *routeLayer = addVectorLayer( fileName + "?type=route",
+                                      fileInfo.baseName() + ", routes", QStringLiteral( "gpx" ) ) )
+      routeLayer->startEditing();
+    if ( QgsVectorLayer *waypointLayer = addVectorLayer( fileName + "?type=waypoint",
+                                         fileInfo.baseName() + ", waypoints", QStringLiteral( "gpx" ) ) )
+      waypointLayer->startEditing();
+  }
 }
 
 void QgisApp::showRasterCalculator()
@@ -10908,19 +10960,38 @@ void QgisApp::toggleMapTips( bool enabled )
 
 void QgisApp::toggleEditing()
 {
-  QgsMapLayer *currentLayer =  activeLayer();
-  if ( currentLayer && currentLayer->supportsEditing() )
+  const QList<QgsMapLayer *> layerList = layerTreeView()->selectedLayers();
+  if ( !layerList.isEmpty() )
   {
-    toggleEditing( currentLayer, true );
+    // if there are selected layers, try to toggle those.
+    // mActionToggleEditing has already been triggered at this point so its checked status has changed
+    const bool shouldStartEditing = mActionToggleEditing->isChecked();
+    for ( const auto layer : layerList )
+    {
+      if ( layer->supportsEditing() &&
+           shouldStartEditing != layer->isEditable() )
+      {
+        toggleEditing( layer, true );
+      }
+    }
   }
   else
   {
-    // active although there's no layer active!?
-    mActionToggleEditing->setChecked( false );
-    mActionToggleEditing->setEnabled( false );
-    visibleMessageBar()->pushMessage( tr( "Start editing failed" ),
-                                      tr( "Layer cannot be edited" ),
-                                      Qgis::MessageLevel::Warning );
+    // if there are no selected layers, try to toggle the current layer
+    QgsMapLayer *currentLayer =  activeLayer();
+    if ( currentLayer && currentLayer->supportsEditing() )
+    {
+      toggleEditing( currentLayer, true );
+    }
+    else
+    {
+      // active although there's no layer active!?
+      mActionToggleEditing->setChecked( false );
+      mActionToggleEditing->setEnabled( false );
+      visibleMessageBar()->pushMessage( tr( "Start editing failed" ),
+                                        tr( "Layer cannot be edited" ),
+                                        Qgis::MessageLevel::Warning );
+    }
   }
 }
 
@@ -14383,9 +14454,9 @@ void QgisApp::layersWereAdded( const QList<QgsMapLayer *> &layers )
   const auto constLayers = layers;
   for ( QgsMapLayer *layer : constLayers )
   {
-    connect( layer, &QgsMeshLayer::layerModified, this, &QgisApp::updateLayerModifiedActions );
-    connect( layer, &QgsMeshLayer::editingStarted, this, &QgisApp::layerEditStateChanged );
-    connect( layer, &QgsMeshLayer::editingStopped, this, &QgisApp::layerEditStateChanged );
+    connect( layer, &QgsMapLayer::layerModified, this, &QgisApp::updateLayerModifiedActions );
+    connect( layer, &QgsMapLayer::editingStarted, this, &QgisApp::layerEditStateChanged );
+    connect( layer, &QgsMapLayer::editingStopped, this, &QgisApp::layerEditStateChanged );
 
     if ( QgsVectorLayer *vlayer = qobject_cast<QgsVectorLayer *>( layer ) )
     {
@@ -14803,7 +14874,7 @@ void QgisApp::activateDeactivateLayerRelatedActions( QgsMapLayer *layer )
     mActionSelectPolygon->setEnabled( false );
     mActionSelectFreehand->setEnabled( false );
     mActionSelectRadius->setEnabled( false );
-    mActionIdentify->setEnabled( !identifyModeIsActiveLayer );
+    mActionIdentify->setEnabled( true );
     mActionSelectByExpression->setEnabled( false );
     mActionSelectByForm->setEnabled( false );
     mActionLabeling->setEnabled( false );

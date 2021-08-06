@@ -381,15 +381,15 @@ class CORE_EXPORT Qgis
     Q_ENUM( DriveType )
 
     /**
-     * Enum to determine when a fetching operation would begin
+     * Enum to determine when an operation would begin
      * \since QGIS 3.22
      */
-    enum class FetchingMode SIP_MONKEYPATCH_SCOPEENUM_UNNEST( QgsNetworkContentFetcherRegistry, FetchingMode ) : int
+    enum class ActionStart SIP_MONKEYPATCH_SCOPEENUM_UNNEST( QgsNetworkContentFetcherRegistry, FetchingMode ) : int
       {
-      FetchLater SIP_MONKEYPATCH_COMPAT_NAME( DownloadLater ), //!< Do not start immediately the fetching
-      FetchImmediately SIP_MONKEYPATCH_COMPAT_NAME( DownloadImmediately ), //!< The fetching will start immediately
+      Deferred SIP_MONKEYPATCH_COMPAT_NAME( DownloadLater ), //!< Do not start immediately the action
+      Immediate SIP_MONKEYPATCH_COMPAT_NAME( DownloadImmediately ), //!< Action will start immediately
     };
-    Q_ENUM( FetchingMode )
+    Q_ENUM( ActionStart )
 
     /**
      * Unplaced label visibility.
@@ -534,6 +534,166 @@ class CORE_EXPORT Qgis
     Q_ENUM( VertexMarkerType )
 
     /**
+     * Status for fetched or stored content
+     * \since QGIS 3.22
+     */
+    enum class ContentStatus : int
+    {
+      NotStarted, //!< Content fetching/storing has not started yet
+      Running, //!< Content fetching/storing is in progress
+      Finished, //!< Content fetching/storing is finished and successful
+      Failed, //!< Content fetching/storing has failed
+      Canceled, //!< Content fetching/storing has been canceled
+    };
+    Q_ENUM( ContentStatus )
+
+    /**
+     * Babel GPS format capabilities.
+     *
+     * \since QGIS 3.22
+     */
+    enum class BabelFormatCapability : int
+    {
+      Import = 1 << 0, //!< Format supports importing
+      Export = 1 << 1, //!< Format supports exporting
+      Waypoints = 1 << 2, //!< Format supports waypoints
+      Routes = 1 << 3, //!< Format supports routes
+      Tracks = 1 << 4, //!< Format supports tracks
+    };
+    Q_DECLARE_FLAGS( BabelFormatCapabilities, BabelFormatCapability )
+    Q_ENUM( BabelFormatCapability )
+
+    /**
+     * Babel command flags, which control how commands and arguments
+     * are generated for executing GPSBabel processes.
+     *
+     * \since QGIS 3.22
+     */
+    enum class BabelCommandFlag : int
+    {
+      QuoteFilePaths = 1 << 0, //!< File paths should be enclosed in quotations and escaped
+    };
+    Q_DECLARE_FLAGS( BabelCommandFlags, BabelCommandFlag )
+    Q_ENUM( BabelCommandFlag )
+
+    /**
+     * GPS feature types.
+     *
+     * \since QGIS 3.22
+     */
+    enum class GpsFeatureType : int
+    {
+      Waypoint, //!< Waypoint
+      Route, //!< Route
+      Track, //!< Track
+    };
+    Q_ENUM( GpsFeatureType )
+
+    /**
+     * Success or failure of a geometry operation.
+     *
+     * This enum gives details about cause of failure.
+     *
+     * \since QGIS 3.22
+     */
+    enum class GeometryOperationResult SIP_MONKEYPATCH_SCOPEENUM_UNNEST( QgsGeometry, OperationResult ) : int
+      {
+      Success = 0, //!< Operation succeeded
+      NothingHappened = 1000, //!< Nothing happened, without any error
+      InvalidBaseGeometry, //!< The base geometry on which the operation is done is invalid or empty
+      InvalidInputGeometryType, //!< The input geometry (ring, part, split line, etc.) has not the correct geometry type
+      SelectionIsEmpty, //!< No features were selected
+      SelectionIsGreaterThanOne, //!< More than one features were selected
+      GeometryEngineError, //!< Geometry engine misses a method implemented or an error occurred in the geometry engine
+      LayerNotEditable, //!< Cannot edit layer
+      /* Add part issues */
+      AddPartSelectedGeometryNotFound, //!< The selected geometry cannot be found
+      AddPartNotMultiGeometry, //!< The source geometry is not multi
+      /* Add ring issues*/
+      AddRingNotClosed, //!< The input ring is not closed
+      AddRingNotValid, //!< The input ring is not valid
+      AddRingCrossesExistingRings, //!< The input ring crosses existing rings (it is not disjoint)
+      AddRingNotInExistingFeature, //!< The input ring doesn't have any existing ring to fit into
+      /* Split features */
+      SplitCannotSplitPoint, //!< Cannot split points
+    };
+    Q_ENUM( GeometryOperationResult )
+
+    /**
+     * Geometry validity check flags.
+     *
+     * \since QGIS 3.22
+     */
+    enum class GeometryValidityFlag SIP_MONKEYPATCH_SCOPEENUM_UNNEST( QgsGeometry, ValidityFlag ) : int
+      {
+      AllowSelfTouchingHoles SIP_MONKEYPATCH_COMPAT_NAME( FlagAllowSelfTouchingHoles ) = 1 << 0, //!< Indicates that self-touching holes are permitted. OGC validity states that self-touching holes are NOT permitted, whilst other vendor validity checks (e.g. ESRI) permit self-touching holes.
+    };
+    Q_DECLARE_FLAGS( GeometryValidityFlags, GeometryValidityFlag )
+    Q_ENUM( GeometryValidityFlag )
+
+    /**
+     * Available engines for validating geometries.
+     * \since QGIS 3.22
+     */
+    enum class GeometryValidationEngine SIP_MONKEYPATCH_SCOPEENUM_UNNEST( QgsGeometry, ValidationMethod ) : int
+      {
+      QgisInternal SIP_MONKEYPATCH_COMPAT_NAME( ValidatorQgisInternal ), //!< Use internal QgsGeometryValidator method
+      Geos SIP_MONKEYPATCH_COMPAT_NAME( ValidatorGeos ), //!< Use GEOS validation methods
+    };
+    Q_ENUM( GeometryValidationEngine )
+
+    /**
+     * Side of line to buffer.
+     *
+     * \since QGIS 3.22
+     */
+    enum class BufferSide SIP_MONKEYPATCH_SCOPEENUM_UNNEST( QgsGeometry, BufferSide ) : int
+      {
+      Left SIP_MONKEYPATCH_COMPAT_NAME( SideLeft ) = 0, //!< Buffer to left of line
+      Right SIP_MONKEYPATCH_COMPAT_NAME( SideRight ), //!< Buffer to right of line
+    };
+    Q_ENUM( BufferSide )
+
+    /**
+     * End cap styles for buffers.
+     *
+     * \since QGIS 3.22
+     */
+    enum class EndCapStyle SIP_MONKEYPATCH_SCOPEENUM_UNNEST( QgsGeometry, EndCapStyle ) : int
+      {
+      Round SIP_MONKEYPATCH_COMPAT_NAME( CapRound ) = 1, //!< Round cap
+      Flat SIP_MONKEYPATCH_COMPAT_NAME( CapFlat ), //!< Flat cap (in line with start/end of line)
+      Square SIP_MONKEYPATCH_COMPAT_NAME( CapSquare ), //!< Square cap (extends past start/end of line by buffer distance)
+    };
+    Q_ENUM( EndCapStyle )
+
+    /**
+     * Join styles for buffers.
+     *
+     * \since QGIS 3.22
+     */
+    enum class JoinStyle SIP_MONKEYPATCH_SCOPEENUM_UNNEST( QgsGeometry, JoinStyle ) : int
+      {
+      Round SIP_MONKEYPATCH_COMPAT_NAME( JoinStyleRound ) = 1, //!< Use rounded joins
+      Miter SIP_MONKEYPATCH_COMPAT_NAME( JoinStyleMiter ), //!< Use mitered joins
+      Bevel SIP_MONKEYPATCH_COMPAT_NAME( JoinStyleBevel ), //!< Use beveled joins
+    };
+    Q_ENUM( JoinStyle )
+
+    /**
+     * Feature request spatial filter types.
+     *
+     * \since QGIS 3.22
+     */
+    enum class SpatialFilterType : int
+    {
+      NoFilter, //!< No spatial filtering of features
+      BoundingBox, //!< Filter using a bounding box
+      DistanceWithin, //!< Filter by distance to reference geometry
+    };
+    Q_ENUM( SpatialFilterType )
+
+    /**
      * Identify search radius in mm
      * \since QGIS 2.3
      */
@@ -652,6 +812,9 @@ Q_DECLARE_OPERATORS_FOR_FLAGS( Qgis::SymbolPreviewFlags )
 Q_DECLARE_OPERATORS_FOR_FLAGS( Qgis::BrowserItemCapabilities )
 Q_DECLARE_OPERATORS_FOR_FLAGS( Qgis::SublayerQueryFlags )
 Q_DECLARE_OPERATORS_FOR_FLAGS( Qgis::SqlLayerDefinitionCapabilities )
+Q_DECLARE_OPERATORS_FOR_FLAGS( Qgis::BabelFormatCapabilities )
+Q_DECLARE_OPERATORS_FOR_FLAGS( Qgis::BabelCommandFlags )
+Q_DECLARE_OPERATORS_FOR_FLAGS( Qgis::GeometryValidityFlags )
 
 // hack to workaround warnings when casting void pointers
 // retrieved from QLibrary::resolve to function pointers.
