@@ -39,6 +39,6 @@ jobs:
 
         stale-issue-label: 'stale'
         only-labels: 'feedback'
-        days-before-stale: 14
-        days-before-close: 28
+        days-before-issue-stale: 14
+        days-before-issue-close: 28
         operations-per-run: 1000
