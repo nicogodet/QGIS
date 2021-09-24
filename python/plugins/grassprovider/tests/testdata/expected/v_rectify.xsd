@@ -10,8 +10,8 @@
     </xs:extension>
   </xs:complexContent>
 </xs:complexType>
-<xs:element name="outputbe49290dc4954e58b8b9bd6ae1936a08" type="ogr:outputbe49290dc4954e58b8b9bd6ae1936a08_Type" substitutionGroup="gml:_Feature"/>
-<xs:complexType name="outputbe49290dc4954e58b8b9bd6ae1936a08_Type">
+<xs:element name="outputddef8e2f9e5b41f7a3da0aa8a1b9ef26" type="ogr:outputddef8e2f9e5b41f7a3da0aa8a1b9ef26_Type" substitutionGroup="gml:_Feature"/>
+<xs:complexType name="outputddef8e2f9e5b41f7a3da0aa8a1b9ef26_Type">
   <xs:complexContent>
     <xs:extension base="gml:AbstractFeatureType">
       <xs:sequence>

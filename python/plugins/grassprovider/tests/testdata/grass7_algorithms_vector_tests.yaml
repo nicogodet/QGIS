@@ -547,7 +547,7 @@ tests:
       separator: pipe
     results:
       output:
-        name: expected/v_rectify.gml
+        name: expected/v_rectify.shp
         type: vector
 
 - algorithm: grass7:v.rectify
@@ -581,7 +581,7 @@ tests:
       separator: pipe
     results:
       output:
-        name: expected/v_rectify.gml
+        name: expected/v_rectify.shp
         type: vector
 
   - algorithm: grass7:v.report
