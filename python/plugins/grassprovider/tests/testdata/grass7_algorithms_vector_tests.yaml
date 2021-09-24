@@ -567,6 +567,9 @@ tests:
         name: v_rectify.gml
         type: vector
       order: 1
+      points:
+        name: ''
+        type: file
       separator: pipe
     results:
       output:
