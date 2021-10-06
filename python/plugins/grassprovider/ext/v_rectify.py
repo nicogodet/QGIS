@@ -45,7 +45,8 @@ def processCommand(alg, parameters, context, feedback):
         # Inject rules into temporary txt file
         with open(pointsName, "w") as tempPoints:
             tempPoints.write(inlinePoints)
-        alg.removeParameter('inline_points')
-        parameters['points'] = tempPoints
 
-    alg.processCommand(parameters, context, feedback, True)
+        alg.removeParameter('inline_points')
+        parameters['points'] = pointsName
+
+    alg.processCommand(parameters, context, feedback)
