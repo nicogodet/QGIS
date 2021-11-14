@@ -96,6 +96,10 @@ class TestQgsVirtualLayerDefinition(unittest.TestCase):
         source_layer = f3.sourceLayers()[0]
         self.assertEqual(source_layer.reference(), 'Reprojeté_e888ce1e_17a9_46f4_b8c3_254eef3f2931')
 
+        url = QUrl(r"file:///C:/Users/Nicolas Godet/AppData/Local/Temp/QGIS3.aHnRWI?layer_ref=Pistes_Ibardin_6bac0d29_baae_4574_9a20_aab9403d3745:Pistes_Ibardin&query=select * from Pistes_Ibardin&geometry=geometry:5:2154&field=id:int&field=Nom:text&field=Difficulte:text&field=Dénivelé:real&field=Longueur:int&lazy")
+        f4 = QgsVirtualLayerDefinition.fromUrl(url)
+        self.assertEqual(f4.toUrl(), url)
+
 
 if __name__ == '__main__':
     unittest.main()
