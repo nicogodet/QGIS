@@ -83,4 +83,6 @@ dnf install -y --nogpgcheck \
   sqlite-devel \
   wget \
   xorg-x11-server-Xvfb \
-  zip
+  zip && \
+python3 -m pip install sipbuild
+
