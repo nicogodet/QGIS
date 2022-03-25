@@ -262,19 +262,17 @@ void QgsVectorTileLayerRenderer::decodeAndDrawTile( const QgsVectorTileRawData &
   if ( ctx.renderingStopped() )
     return;
 
-  {
-    // set up clipping so that rendering does not go behind tile's extent
-    const QgsScopedQPainterState savePainterState( ctx.painter() );
-    // we have to intersect with any existing painter clip regions, or we risk overwriting valid clip
-    // regions setup outside of the vector tile renderer (e.g. layout map clip region)
-    ctx.painter()->setClipRegion( QRegion( tile.tilePolygon() ), Qt::IntersectClip );
+  // set up clipping so that rendering does not go behind tile's extent
+  const QgsScopedQPainterState savePainterState( ctx.painter() );
+  // we have to intersect with any existing painter clip regions, or we risk overwriting valid clip
+  // regions setup outside of the vector tile renderer (e.g. layout map clip region)
+  ctx.painter()->setClipRegion( QRegion( tile.tilePolygon() ), Qt::IntersectClip );
 
-    QElapsedTimer tDraw;
-    tDraw.start();
+  QElapsedTimer tDraw;
+  tDraw.start();
 
-    mRenderer->renderTile( tile, ctx );
-    mTotalDrawTime += tDraw.elapsed();
-  }
+  mRenderer->renderTile( tile, ctx );
+  mTotalDrawTime += tDraw.elapsed();
 
   if ( mLabelProvider )
     mLabelProvider->registerTileFeatures( tile, ctx );
