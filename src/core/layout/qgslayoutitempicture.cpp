@@ -445,6 +445,7 @@ void QgsLayoutItemPicture::loadLocalPicture( const QString &path )
           mDefaultSvgSize.setHeight( viewBox.height() );
         }
       }
+    recalculateSize();
     }
     else
     {
