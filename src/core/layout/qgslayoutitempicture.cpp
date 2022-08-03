@@ -422,7 +422,34 @@ void QgsLayoutItemPicture::loadLocalPicture( const QString &path )
 
   if ( !pic.exists() )
   {
-    mMode = FormatUnknown;
+    if ( mHasExpressionError )
+    {
+      //trying to load an invalid file or bad expression, show cross picture
+      mIsMissingImage = true;
+      if ( mMode == FormatRaster )
+      {
+        const QString badFile( QStringLiteral( ":/images/composer/missing_image.png" ) );
+        QImageReader imageReader( badFile );
+        if ( imageReader.read( &mImage ) )
+          mMode = FormatRaster;
+      }
+      else
+      {
+        const QString badFile( QStringLiteral( ":/images/composer/missing_image.svg" ) );
+        mSVG.load( badFile );
+        if ( mSVG.isValid() )
+        {
+          mMode = FormatSVG;
+          const QRect viewBox = mSVG.viewBox(); //take width/height ratio from view box instead of default size
+          mDefaultSvgSize.setWidth( viewBox.width() );
+          mDefaultSvgSize.setHeight( viewBox.height() );
+        }
+      }
+    }
+    else
+    {
+      mMode = FormatUnknown;
+    }
   }
   else
   {
