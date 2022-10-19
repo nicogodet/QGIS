@@ -319,7 +319,12 @@ int QgsBlockingProcess::run( QgsFeedback *feedback )
       const QByteArray ba = p.readAllStandardError();
       mStderrHandler( ba );
     } );
+#ifdef Q_OS_WIN
+    p.setNativeArguments( mArguments );
+    p.start( mProcess, QProcess::Unbuffered | QProcess::ReadWrite );
+#else
     p.start( mProcess, mArguments, QProcess::Unbuffered | QProcess::ReadWrite );
+#endif
     if ( !p.waitForStarted() )
     {
       result = 1;
