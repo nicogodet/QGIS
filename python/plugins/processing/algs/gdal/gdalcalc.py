@@ -21,6 +21,8 @@ __author__ = 'Giovanni Manghi'
 __date__ = 'January 2015'
 __copyright__ = '(C) 2015, Giovanni Manghi'
 
+import re
+
 from qgis.core import (QgsProcessingException,
                        QgsProcessingParameterDefinition,
                        QgsProcessingParameterRasterLayer,
@@ -202,6 +204,9 @@ class gdalcalc(GdalAlgorithm):
         out = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
         self.setOutputValue(self.OUTPUT, out)
         formula = self.parameterAsString(parameters, self.FORMULA, context)
+        # Add space around '>' and '<' so command executed by QProcess is correctly interpreted.
+        # See https://github.com/qgis/QGIS/issues/42724
+        formula = re.sub('(?<! )(?=[><])|(?<=[><])(?! )', r' ', formula)
         if self.NO_DATA in parameters and parameters[self.NO_DATA] is not None:
             noData = self.parameterAsDouble(parameters, self.NO_DATA, context)
         else:
