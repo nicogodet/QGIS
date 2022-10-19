@@ -320,7 +320,7 @@ int QgsBlockingProcess::run( QgsFeedback *feedback )
       mStderrHandler( ba );
     } );
 #ifdef Q_OS_WIN
-    p.setNativeArguments( mArguments );
+    p.setNativeArguments( mArguments.join( " " ) );
     p.start( mProcess, QProcess::Unbuffered | QProcess::ReadWrite );
 #else
     p.start( mProcess, mArguments, QProcess::Unbuffered | QProcess::ReadWrite );
