@@ -161,7 +161,8 @@ class InterpolationDataWidget(BASE, WIDGET):
             self.addLayerData(v[0], v[1])
 
             comboBox = self.layersTree.itemWidget(self.layersTree.topLevelItem(i), 2)
-            comboBox.setCurrentIndex(comboBox.findText(v[3]))
+            comboBox.setCurrentIndex((int(v[3])))
+
         self.hasChanged.emit()
 
     def value(self):
