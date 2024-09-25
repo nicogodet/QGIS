@@ -295,7 +295,7 @@ void QgsProcessingContext::LayerDetails::setOutputLayerName( QgsMapLayer *layer 
       if ( !path.isEmpty() )
       {
         const QFileInfo fi( path );
-        layer->setName( fi.baseName() );
+        layer->setName( fi.completeBaseName() );
       }
       else if ( !name.isEmpty() )
       {
