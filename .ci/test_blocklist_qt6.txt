@@ -1,11 +1,4 @@
 # Qt6 blocklist
-test_core_compositionconverter
-test_core_labelingengine
-test_core_layoutpicture
-test_core_vectortilelayer
-test_gui_processinggui
-test_app_advanceddigitizing
-test_app_vertextool
 
 # Crashes -- also disabled on qt5 builds!
 test_gui_queryresultwidget
@@ -31,16 +24,3 @@ PyQgsProviderConnectionMssql
 PyQgsStyleStorageMssql
 
 # To be fixed
-PyQgsAnnotation
-PyQgsAuthenticationSystem
-PyQgsEditWidgets
-PyQgsElevationProfileCanvas
-PyQgsLayoutHtml
-PyQgsPalLabelingPlacement
-PyQgsRasterLayerRenderer
-PyQgsSettings
-PyQgsSettingsEntry
-PyQgsServerAccessControlWFSTransactional
-ProcessingQgisAlgorithmsTestPt4
-# PyQgsProviderRegistry runs fine locally on Fedora:rawhide but not on CI
-PyQgsProviderRegistry
