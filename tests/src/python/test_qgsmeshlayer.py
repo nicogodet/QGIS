@@ -9,7 +9,14 @@ the Free Software Foundation; either version 2 of the License, or
 import tempfile
 import unittest
 
-from qgis.core import Qgis, QgsMeshDatasetIndex, QgsMeshLayer, QgsProject
+from qgis.core import (
+    Qgis,
+    QgsMesh,
+    QgsMeshDatasetIndex,
+    QgsMeshLayer,
+    QgsProject,
+    QgsRectangle,
+)
 from qgis.testing import QgisTestCase, start_app
 
 start_app()
@@ -92,6 +99,49 @@ class TestQgsMeshLayer(QgisTestCase):
             self.assertTrue(
                 ml2.legend().flags() & Qgis.MapLayerLegendFlag.ExcludeByDefault
             )
+
+    def test_element_indexes_in_rectangle(self):
+        """Rectangle spatial queries on the cached triangular mesh."""
+        layer = QgsMeshLayer(
+            "1.0, 2.0\n2.0, 2.0\n3.0, 2.0\n2.0, 3.0\n1.0, 3.0\n---\n0, 1, 3, 4\n1, 2, 3",
+            "quad and triangle",
+            "mesh_memory",
+        )
+        self.assertTrue(layer.isValid())
+
+        vertex = QgsMesh.ElementType.Vertex
+        face = QgsMesh.ElementType.Face
+        edge = QgsMesh.ElementType.Edge
+        rect_all = QgsRectangle(0.0, 1.0, 4.0, 4.0)
+
+        # No rendering yet: no cached triangular mesh
+        self.assertEqual(layer.elementIndexesInRectangle(vertex, rect_all), [])
+
+        layer.updateTriangularMesh()
+
+        self.assertEqual(
+            layer.elementIndexesInRectangle(vertex, rect_all), [0, 1, 2, 3, 4]
+        )
+        self.assertEqual(layer.elementIndexesInRectangle(face, rect_all), [0, 1])
+        self.assertEqual(layer.elementIndexesInRectangle(edge, rect_all), [])
+
+        # Vertices: exact containment (only v2 at (3.0, 2.0))
+        self.assertEqual(
+            layer.elementIndexesInRectangle(vertex, QgsRectangle(2.9, 1.9, 3.1, 2.1)),
+            [2],
+        )
+
+        # Faces: bbox intersection; the two derived triangles of the quad
+        # deduplicate to a single native index
+        inner = QgsRectangle(1.05, 2.4, 1.2, 2.6)
+        self.assertEqual(layer.elementIndexesInRectangle(face, inner), [0])
+        # ... while that rectangle contains no vertex
+        self.assertEqual(layer.elementIndexesInRectangle(vertex, inner), [])
+
+        # Fully outside
+        self.assertEqual(
+            layer.elementIndexesInRectangle(face, QgsRectangle(10, 10, 11, 11)), []
+        )
 
 
 if __name__ == "__main__":
