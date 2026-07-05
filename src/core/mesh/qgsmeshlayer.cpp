@@ -17,6 +17,7 @@
 
 #include "qgsmeshlayer.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <limits>
 #include <memory>
@@ -1495,6 +1496,65 @@ int QgsMeshLayer::closestElement( QgsMesh::ElementType elementType, const QgsPoi
       return closestFace( point, searchRadius, projectedPoint );
   }
   return -1;
+}
+
+QList<int> QgsMeshLayer::elementIndexesInRectangle( QgsMesh::ElementType elementType, const QgsRectangle &rectangle ) const
+{
+  QGIS_PROTECT_QOBJECT_THREAD_ACCESS
+
+  const QgsTriangularMesh *mesh = triangularMesh();
+  if ( !mesh )
+    return QList<int>();
+
+  QSet<int> indexes;
+  switch ( elementType )
+  {
+    case QgsMesh::Vertex:
+    {
+      const QVector<QgsMeshVertex> &vertices = mesh->vertices();
+      const QList<int> triangleIndexes = mesh->faceIndexesForRectangle( rectangle );
+      for ( const int triangleIndex : triangleIndexes )
+      {
+        const QgsMeshFace &triangle = mesh->triangles().at( triangleIndex );
+        for ( const int vertexIndex : triangle )
+        {
+          if ( rectangle.contains( QgsPointXY( vertices.at( vertexIndex ) ) ) )
+            indexes.insert( vertexIndex );
+        }
+      }
+      const QList<int> edgeIndexes = mesh->edgeIndexesForRectangle( rectangle );
+      for ( const int edgeIndex : edgeIndexes )
+      {
+        const QgsMeshEdge &edge = mesh->edges().at( edgeIndex );
+        for ( const int vertexIndex : { edge.first, edge.second } )
+        {
+          if ( rectangle.contains( QgsPointXY( vertices.at( vertexIndex ) ) ) )
+            indexes.insert( vertexIndex );
+        }
+      }
+      break;
+    }
+
+    case QgsMesh::Face:
+    {
+      const QList<int> nativeIndexes = mesh->nativeFaceIndexForRectangle( rectangle );
+      indexes = QSet<int>( nativeIndexes.cbegin(), nativeIndexes.cend() );
+      break;
+    }
+
+    case QgsMesh::Edge:
+    {
+      const QVector<int> &edgesToNativeEdges = mesh->edgesToNativeEdges();
+      const QList<int> edgeIndexes = mesh->edgeIndexesForRectangle( rectangle );
+      for ( const int edgeIndex : edgeIndexes )
+        indexes.insert( edgesToNativeEdges.at( edgeIndex ) );
+      break;
+    }
+  }
+
+  QList<int> result( indexes.cbegin(), indexes.cend() );
+  std::sort( result.begin(), result.end() );
+  return result;
 }
 
 QList<int> QgsMeshLayer::selectVerticesByExpression( QgsExpression expression )

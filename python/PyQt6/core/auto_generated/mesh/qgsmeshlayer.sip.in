@@ -761,6 +761,35 @@ the face The snapped position is in map coordinates.
 .. versionadded:: 3.44
 %End
 
+    QList<int> elementIndexesInRectangle( QgsMesh::ElementType elementType, const QgsRectangle &rectangle ) const;
+%Docstring
+Returns the indexes, in the native mesh, of the elements of the given
+``elementType`` intersecting ``rectangle``, in map coordinates, sorted
+in ascending order.
+
+Vertex indexes are returned when the vertex position is inside the
+rectangle. Face and edge indexes are returned when the bounding box of
+the element intersects the rectangle.
+
+.. note::
+
+   It uses previously cached and indexed triangular mesh
+   and so if the layer has not been rendered previously
+   (e.g. when used in a script) it returns an empty list
+
+.. seealso:: :py:func:`updateTriangularMesh`
+
+.. seealso:: :py:func:`closestElement`
+
+:param elementType: the type of element to return
+:param rectangle: the search rectangle, in map coordinates
+
+:return: the indexes of the elements of type ``elementType``
+         intersecting ``rectangle``, empty list if none
+
+.. versionadded:: 4.4
+%End
+
     QList<int> selectVerticesByExpression( QgsExpression expression );
 %Docstring
 Returns a list of vertex indexes that meet the condition defined by

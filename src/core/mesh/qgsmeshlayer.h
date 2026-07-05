@@ -755,6 +755,28 @@ class CORE_EXPORT QgsMeshLayer : public QgsMapLayer, public QgsAbstractProfileSo
     int closestElement( QgsMesh::ElementType elementType, const QgsPointXY &point, double searchRadius, QgsPointXY &projectedPoint SIP_OUT ) const;
 
     /**
+      * Returns the indexes, in the native mesh, of the elements of the given \a elementType
+      * intersecting \a rectangle, in map coordinates, sorted in ascending order.
+      *
+      * Vertex indexes are returned when the vertex position is inside the rectangle.
+      * Face and edge indexes are returned when the bounding box of the element intersects
+      * the rectangle.
+      *
+      * \note It uses previously cached and indexed triangular mesh
+      * and so if the layer has not been rendered previously
+      * (e.g. when used in a script) it returns an empty list
+      * \see updateTriangularMesh()
+      * \see closestElement()
+      *
+      * \param elementType the type of element to return
+      * \param rectangle the search rectangle, in map coordinates
+      * \return the indexes of the elements of type \a elementType intersecting \a rectangle, empty list if none
+      *
+      * \since QGIS 4.4
+      */
+    QList<int> elementIndexesInRectangle( QgsMesh::ElementType elementType, const QgsRectangle &rectangle ) const;
+
+    /**
      * Returns a list of vertex indexes that meet the condition defined by \a expression with the context \a expressionContext
      *
      * To express the relation with a vertex, the expression can be defined with function returning value
