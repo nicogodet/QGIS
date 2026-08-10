@@ -326,6 +326,7 @@ class TestQgsTaskManager : public QObject
     void hiddenTask();
     void testQgsTaskWithSerialSubTasks();
     void taskCreatedInBackgroundThread();
+    void runnableNotTrackedOnceRunning();
 };
 
 void TestQgsTaskManager::initTestCase()
@@ -1776,6 +1777,43 @@ void TestQgsTaskManager::taskCreatedInBackgroundThread()
   }
 
   QCOMPARE( task.load()->status(), QgsTask::Complete );
+}
+
+void TestQgsTaskManager::runnableNotTrackedOnceRunning()
+{
+  // regression test for https://github.com/qgis/QGIS/issues/53806
+  QgsTaskManager manager;
+  ProgressReportingTask *task = new ProgressReportingTask( u"task"_s );
+  const long id = manager.addTask( task );
+
+  while ( task->status() != QgsTask::Running )
+  {
+    QCoreApplication::processEvents();
+  }
+
+  // running by now, so the manager must no longer point at the runnable
+  {
+    const QMutexLocker ml( manager.mTaskMutex );
+    const auto it = manager.mTasks.constFind( id );
+    QVERIFY( it != manager.mTasks.constEnd() );
+    QVERIFY( !it->runnable );
+  }
+
+  // once finished, no stale entry may be left behind
+  task->finish();
+
+  QElapsedTimer timer;
+  timer.start();
+  bool forgotten = false;
+  while ( !forgotten && timer.elapsed() < 10000 )
+  {
+    QCoreApplication::processEvents();
+    const QMutexLocker ml( manager.mTaskMutex );
+    forgotten = !manager.mTasks.contains( id );
+  }
+  QVERIFY( forgotten );
+
+  flushEvents();
 }
 
 QGSTEST_MAIN( TestQgsTaskManager )

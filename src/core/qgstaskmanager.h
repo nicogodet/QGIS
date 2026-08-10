@@ -592,10 +592,11 @@ class CORE_EXPORT QgsTaskManager : public QObject
     struct TaskInfo
     {
         TaskInfo( QgsTask *task = nullptr, int priority = 0 );
-        void createRunnable();
+        void createRunnable( QgsTaskManager *manager, long taskId );
         QgsTask *task = nullptr;
         QAtomicInt added;
         int priority;
+        //! Owned by the thread pool and only valid until it starts running. Access via takeRunnable().
         QgsTaskRunnableWrapper *runnable = nullptr;
     };
 
@@ -644,6 +645,13 @@ class CORE_EXPORT QgsTaskManager : public QObject
     //! Will return TRUE if the specified task has circular dependencies
     bool hasCircularDependencies( long taskId ) const;
 
+    //! Takes the runnable for \a taskId off the thread pool queue and destroys it if it hasn't started, then clears the pointer
+    void takeRunnable( long taskId );
+
+    //! Clears the stored pointer to \a runnable when it starts running. Called from worker threads.
+    void forgetRunnable( long taskId, QgsTaskRunnableWrapper *runnable );
+
+    friend class QgsTaskRunnableWrapper;
     friend class TestQgsTaskManager;
 };
 

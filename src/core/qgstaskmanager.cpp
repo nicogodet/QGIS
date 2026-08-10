@@ -367,8 +367,10 @@ void QgsTask::terminated()
 class QgsTaskRunnableWrapper : public QRunnable
 {
   public:
-    explicit QgsTaskRunnableWrapper( QgsTask *task )
+    explicit QgsTaskRunnableWrapper( QgsTask *task, QgsTaskManager *manager, long taskId )
       : mTask( task )
+      , mManager( manager )
+      , mTaskId( taskId )
     {
       setAutoDelete( true );
     }
@@ -376,11 +378,19 @@ class QgsTaskRunnableWrapper : public QRunnable
     void run() override
     {
       Q_ASSERT( mTask );
+
+      // the pool destroys this runnable as soon as run() returns, so the manager must drop
+      // its pointer now, before it dangles
+      if ( mManager )
+        mManager->forgetRunnable( mTaskId, this );
+
       mTask->start();
     }
 
   private:
     QgsTask *mTask = nullptr;
+    QgsTaskManager *mManager = nullptr;
+    long mTaskId = 0;
 };
 
 ///@endcond
@@ -412,8 +422,9 @@ QgsTaskManager::~QgsTaskManager()
     cleanupAndDeleteTask( it.value().task );
   }
 
-  delete mTaskMutex;
+  // pending runnables call back into forgetRunnable(), which locks the mutex
   mThreadPool->waitForDone();
+  delete mTaskMutex;
 }
 
 QThreadPool *QgsTaskManager::threadPool()
@@ -741,14 +752,7 @@ void QgsTaskManager::taskStatusChanged( int status )
   if ( id < 0 )
     return;
 
-  mTaskMutex->lock();
-  QgsTaskRunnableWrapper *runnable = mTasks.value( id ).runnable;
-  mTaskMutex->unlock();
-  if ( runnable && mThreadPool->tryTake( runnable ) )
-  {
-    delete runnable;
-    mTasks[id].runnable = nullptr;
-  }
+  takeRunnable( id );
 
   if ( status == QgsTask::Terminated || status == QgsTask::Complete )
   {
@@ -819,8 +823,6 @@ bool QgsTaskManager::cleanupAndDeleteTask( QgsTask *task )
   if ( id < 0 )
     return false;
 
-  QgsTaskRunnableWrapper *runnable = mTasks.value( id ).runnable;
-
   task->disconnect( this );
 
   mTaskMutex->lock();
@@ -832,13 +834,19 @@ bool QgsTaskManager::cleanupAndDeleteTask( QgsTask *task )
 
   mTaskMutex->lock();
   bool isParent = mParentTasks.contains( task );
+  const bool taskFinished = task->status() == QgsTask::Complete || task->status() == QgsTask::Terminated;
+
+  // must happen while the task is still tracked
+  if ( taskFinished )
+    takeRunnable( id );
+
   mParentTasks.remove( task );
   mSubTasks.remove( task );
   mTasks.remove( id );
   mMapTaskPtrToId.remove( task );
   mLayerDependencies.remove( id );
 
-  if ( task->status() != QgsTask::Complete && task->status() != QgsTask::Terminated )
+  if ( !taskFinished )
   {
     if ( isParent )
     {
@@ -848,19 +856,10 @@ bool QgsTaskManager::cleanupAndDeleteTask( QgsTask *task )
     }
     task->cancel();
   }
-  else
+  else if ( isParent )
   {
-    if ( runnable && mThreadPool->tryTake( runnable ) )
-    {
-      delete runnable;
-      mTasks[id].runnable = nullptr;
-    }
-
-    if ( isParent )
-    {
-      //task already finished, kill it
-      task->deleteLater();
-    }
+    //task already finished, kill it
+    task->deleteLater();
   }
 
   // at this stage (hopefully) dependent tasks have been canceled or queued
@@ -876,6 +875,33 @@ bool QgsTaskManager::cleanupAndDeleteTask( QgsTask *task )
   return true;
 }
 
+void QgsTaskManager::takeRunnable( long taskId )
+{
+  // mTaskMutex is always locked before the pool's own lock (see processQueue()), so holding it
+  // across tryTake() is safe, and it keeps the read and the take atomic
+  const QMutexLocker ml( mTaskMutex );
+
+  const auto it = mTasks.find( taskId );
+  if ( it == mTasks.end() || !it->runnable )
+    return;
+
+  if ( mThreadPool->tryTake( it->runnable ) )
+  {
+    // never started, so the pool won't delete it for us
+    delete it->runnable;
+  }
+  it->runnable = nullptr;
+}
+
+void QgsTaskManager::forgetRunnable( long taskId, QgsTaskRunnableWrapper *runnable )
+{
+  const QMutexLocker ml( mTaskMutex );
+
+  const auto it = mTasks.find( taskId );
+  if ( it != mTasks.end() && it->runnable == runnable )
+    it->runnable = nullptr;
+}
+
 void QgsTaskManager::processQueue()
 {
   int prevActiveCount = countActiveTasks( false );
@@ -886,7 +912,7 @@ void QgsTaskManager::processQueue()
     QgsTask *task = it.value().task;
     if ( task && task->mStatus == QgsTask::Queued && dependenciesSatisfied( it.key() ) && it.value().added.testAndSetRelaxed( 0, 1 ) )
     {
-      it.value().createRunnable();
+      it.value().createRunnable( this, it.key() );
       mThreadPool->start( it.value().runnable, it.value().priority );
     }
 
@@ -943,10 +969,10 @@ QgsTaskManager::TaskInfo::TaskInfo( QgsTask *task, int priority )
   , priority( priority )
 {}
 
-void QgsTaskManager::TaskInfo::createRunnable()
+void QgsTaskManager::TaskInfo::createRunnable( QgsTaskManager *manager, long taskId )
 {
   Q_ASSERT( !runnable );
-  runnable = new QgsTaskRunnableWrapper( task ); // auto deleted
+  runnable = new QgsTaskRunnableWrapper( task, manager, taskId ); // auto deleted
 }
 
 
