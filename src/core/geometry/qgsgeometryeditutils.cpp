@@ -394,6 +394,11 @@ std::unique_ptr<QgsAbstractGeometry> QgsGeometryEditUtils::avoidIntersections(
   if ( avoidIntersectionsLayers.isEmpty() )
     return nullptr; //no intersections stored in project does not mean error
 
+  // only the features actually intersecting the geometry can change the result: filtering them
+  // here avoids an expensive union of every feature within the bounding box, which can be huge
+  // (e.g. a large polygon surrounded by hundreds of complex neighbors)
+  geomEngine->prepareGeometry();
+
   QVector< QgsGeometry > nearGeometries;
 
   //go through list, convert each layer to vector layer and call QgsVectorLayer::removePolygonIntersections for each
@@ -414,10 +419,21 @@ std::unique_ptr<QgsAbstractGeometry> QgsGeometryEditUtils::avoidIntersections(
       if ( !f.hasGeometry() )
         continue;
 
-      if ( !f.geometry().isGeosValid() )
+      const QgsGeometry nearGeometry = f.geometry();
+      if ( !nearGeometry.isGeosValid() )
+      {
+        // the intersection test is not reliable for invalid geometries, keep them as before
         haveInvalidGeometry = true;
+      }
+      else
+      {
+        // if the test fails (e.g. invalid edited geometry), keep the feature as before
+        QString error;
+        if ( !geomEngine->intersects( nearGeometry.constGet(), &error ) && error.isEmpty() )
+          continue;
+      }
 
-      nearGeometries << f.geometry();
+      nearGeometries << nearGeometry;
     }
   }
 

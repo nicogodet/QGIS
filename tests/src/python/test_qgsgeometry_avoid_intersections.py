@@ -13,7 +13,7 @@ __copyright__ = "Copyright 2012, The QGIS Project"
 
 import unittest
 
-from qgis.core import QgsFeature, QgsGeometry, QgsVectorLayer
+from qgis.core import Qgis, QgsFeature, QgsGeometry, QgsVectorLayer
 from qgis.testing import QgisTestCase, start_app
 
 feat_wkt = [
@@ -64,6 +64,59 @@ class TestQgsGeometryAvoidIntersections(QgisTestCase):
         # (in QGIS 2.0 it has one more tiny part that appears at the border between two of the original polygons)
         mpg = g.asMultiPolygon()
         assert len(mpg) == 3
+
+    def testOnlyIntersectingNeighbours(self):
+        """
+        Features inside the bounding box but not intersecting the geometry must not
+        change the result (they are skipped before the union)
+        """
+        l = QgsVectorLayer("Polygon", "test_layer", "memory")
+        self.assertTrue(l.isValid())
+        wkts = [
+            # overlaps the bottom of the U
+            "POLYGON((-1 -1, 11 -1, 11 1, -1 1, -1 -1))",
+            # inside the U opening: within the bounding box, but no intersection
+            "POLYGON((4 4, 6 4, 6 9, 4 9, 4 4))",
+            # touches the inner side of the left arm only
+            "POLYGON((3 5, 3.5 5, 3.5 6, 3 6, 3 5))",
+        ]
+        features = []
+        for i, wkt in enumerate(wkts, start=1):
+            f = QgsFeature(i)
+            f.setGeometry(QgsGeometry.fromWkt(wkt))
+            features.append(f)
+        self.assertTrue(l.dataProvider().addFeatures(features))
+
+        g = QgsGeometry.fromWkt(
+            "POLYGON((0 0, 10 0, 10 10, 7 10, 7 3, 3 3, 3 10, 0 10, 0 0))"
+        )
+        self.assertEqual(
+            g.avoidIntersectionsV2([l]), Qgis.GeometryOperationResult.Success
+        )
+        expected = QgsGeometry.fromWkt(
+            "POLYGON((0 1, 10 1, 10 10, 7 10, 7 3, 3 3, 3 10, 0 10, 0 1))"
+        )
+        self.assertTrue(g.isGeosEqual(expected), g.asWkt())
+
+    def testInvalidNeighbourOutsideGeometry(self):
+        """
+        An invalid feature in the bounding box is still reported, even if it does not
+        intersect the geometry
+        """
+        l = QgsVectorLayer("Polygon", "test_layer", "memory")
+        self.assertTrue(l.isValid())
+        f = QgsFeature(1)
+        # self-intersecting bow tie inside the U opening
+        f.setGeometry(QgsGeometry.fromWkt("POLYGON((4 4, 6 9, 6 4, 4 9, 4 4))"))
+        self.assertTrue(l.dataProvider().addFeatures([f]))
+
+        g = QgsGeometry.fromWkt(
+            "POLYGON((0 0, 10 0, 10 10, 7 10, 7 3, 3 3, 3 10, 0 10, 0 0))"
+        )
+        self.assertEqual(
+            g.avoidIntersectionsV2([l]),
+            Qgis.GeometryOperationResult.InvalidBaseGeometry,
+        )
 
 
 if __name__ == "__main__":
